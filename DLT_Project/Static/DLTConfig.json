@@ -1,0 +1,8 @@
+﻿{
+  "DataIpAdress": "127.0.0.1",
+  "DataBaseName": "CylTest",
+  "Uid": "sa",
+  "Pwd": "123456",
+  "PortName": "COM1",
+  "BaudRate": 9600
+}
