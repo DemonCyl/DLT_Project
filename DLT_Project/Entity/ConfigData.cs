@@ -26,6 +26,8 @@ namespace DLT_Project.Entity
         public int BaudRate { get; set; }
         #endregion
 
+        public string PlcIpAdress { get; set; }
 
+        public int PlcPort { get; set; }
     }
 }

@@ -19,6 +19,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using HslCommunication;
+using HslCommunication.Profinet.Melsec;
 
 namespace DLT_Project
 {
@@ -42,6 +44,8 @@ namespace DLT_Project
         private bool dataMark = false;
         private int over = 0;
         private string markBarcode = null;
+
+        private MelsecMcNet plc;
 
 
         public MainWindow()
@@ -153,7 +157,7 @@ namespace DLT_Project
                 #endregion
 
                 #region 读取存储信号
-                over = 1;
+                over = 0;
 
                 if (over == 1 && !dataMark)
                 {
