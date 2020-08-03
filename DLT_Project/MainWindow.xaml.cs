@@ -34,6 +34,7 @@ namespace DLT_Project
         private MesInfo mesInfo;
         private MesDataOpService mesDataOpService;
         private ResDataOpService resDataOpService;
+        private PlcDataOpService plcDataOpService;
         private DispatcherTimer ShowTimer;
         private bool sPort = false;
         private bool mData = false;
@@ -42,11 +43,8 @@ namespace DLT_Project
         private static BitmapImage ITrue = new BitmapImage(new Uri("/Static/02.png", UriKind.Relative));
         private DispatcherTimer timer;
         private bool dataMark = false;
-        private int over = 0;
+        private short over = 0;
         private string markBarcode = null;
-
-        private MelsecMcNet plc;
-
 
         public MainWindow()
         {
@@ -59,21 +57,6 @@ namespace DLT_Project
             {
                 CycleDataRead();
             }
-
-            DispatcherTimer dispatcherTimer = new DispatcherTimer();
-            dispatcherTimer.Tick += (s, e) =>
-            {
-                // start 存储
-                if (over == 1 && dataMark)
-                {
-                    bool t = mesDataOpService.DataInsert(mesInfo);
-                }
-
-
-            };
-            dispatcherTimer.Interval = TimeSpan.FromMilliseconds(2000);
-            dispatcherTimer.Start();
-
 
         }
 
@@ -105,10 +88,11 @@ namespace DLT_Project
 
             mesDataOpService = new MesDataOpService(config);
             resDataOpService = new ResDataOpService(config);
+            plcDataOpService = new PlcDataOpService(config);
 
             mData = mesDataOpService.GetConnection();
             sPort = resDataOpService.GetConnection();
-            //PLC connection
+            mPlc = plcDataOpService.GetConnection();
             //Lin connection
 
             PLCImage.Source = (mPlc ? ITrue : IFalse);
@@ -123,7 +107,7 @@ namespace DLT_Project
             timer.Tick += (s, e) =>
             {
                 //读取BarCode
-                string barCode = null;
+                string barCode = plcDataOpService.ReadBarCode();
                 //初始化状态
                 if (barCode != null && !barCode.Equals("") && !barCode.Equals(markBarcode))
                 {
@@ -131,47 +115,57 @@ namespace DLT_Project
                     dataMark = false;
                 }
                 //判断型号
+                LRType type = LRType.Left;
 
                 #region 读取Heater信号
-                int heater = 1;
-                switch (heater)
+                short heater = plcDataOpService.ReadSignal(SignalType.HeaterSignal);
+                if (heater != -1)
                 {
-                    // 0 发送停止加热 00 00 00 00 00 00 00 00
-                    case 0:
-                        break;
-                    //1 发送驱动加热 00 00 ?? ?? 00 00 00 00 // ??->E3  L  R
-                    case 1:
-                        break;
-                    default: break;
+                    switch (heater)
+                    {
+                        case 0:
+                            // 0 发送停止加热 00 00 00 00 00 00 00 00
+
+                            plcDataOpService.WriteHeaterBack();
+                            break;
+                        case 1:
+                            //1 发送驱动加热 00 00 ?? ?? 00 00 00 00 // ??->E3  L  R
+
+                            plcDataOpService.WriteHeaterBack();
+                            break;
+                        default: break;
+                    }
                 }
                 #endregion
 
                 #region 读取Res信号
-                int res = 0;
+                short res = plcDataOpService.ReadSignal(SignalType.ResSignal);
                 if (res == 1)
                 {
-                    resDataOpService.ReadData();
+                    float fData = resDataOpService.ReadData();
                     //write PLC data
-
+                    plcDataOpService.WriteRes(fData);
                 }
                 #endregion
 
                 #region 读取存储信号
-                over = 0;
+                over = plcDataOpService.ReadSignal(SignalType.OverSignal); ;
 
                 if (over == 1 && !dataMark)
                 {
                     dataMark = true;
                     // 读取测试数据资料
-                    mesInfo = new MesInfo();
+                    mesInfo = plcDataOpService.GetInfo(barCode, type);
                     // 存储MES数据
                     bool t = mesDataOpService.DataInsert(mesInfo);
                     if (!t) // 存储失败继续下一次存储直到成功
                     {
                         dataMark = false;
-                    }else
+                    }
+                    else
                     {
                         // 回写PLC存储状态 1:成功
+                        plcDataOpService.WriteOverBack();
                     }
 
                 }
@@ -204,6 +198,7 @@ namespace DLT_Project
         {
             mesDataOpService.Close();
             resDataOpService.Close();
+            plcDataOpService.Close();
         }
 
         /// <summary>
@@ -215,10 +210,12 @@ namespace DLT_Project
         {
             mesDataOpService.Close();
             resDataOpService.Close();
+            plcDataOpService.Close();
             mesDataOpService = null;
             resDataOpService = null;
+            plcDataOpService = null;
             config = null;
-            if(timer != null && timer.IsEnabled)
+            if (timer != null && timer.IsEnabled)
             {
                 timer.Stop();
                 timer = null;

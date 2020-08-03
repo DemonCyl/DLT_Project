@@ -61,8 +61,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Entity\BasicEnum.cs" />
     <Compile Include="Entity\MesInfo.cs" />
-    <Compile Include="Entity\PLCAdress.cs" />
+    <Compile Include="Entity\PLCAddress.cs" />
     <Compile Include="Services\MesDataOpService.cs" />
     <Compile Include="Services\PlcDataOpService.cs" />
     <Compile Include="Services\ResDataOpService.cs" />
@@ -113,9 +114,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Static\01.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Services\0802.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
