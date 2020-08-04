@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace DLT_Project.Entity
 {
+    /// <summary>
+    /// 信号类型
+    /// </summary>
     public enum SignalType
     {
         HeaterSignal = 1,
@@ -13,6 +16,9 @@ namespace DLT_Project.Entity
         OverSignal = 3
     }
 
+    /// <summary>
+    /// 座椅左右型号
+    /// </summary>
     public enum LRType
     {
         Left = 1,

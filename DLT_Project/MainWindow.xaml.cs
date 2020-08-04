@@ -34,17 +34,19 @@ namespace DLT_Project
         private MesDataOpService mesDataOpService;
         private ResDataOpService resDataOpService;
         private PlcDataOpService plcDataOpService;
+        private LINDataOpService linDataOpService;
         private DispatcherTimer ShowTimer;
+        private DispatcherTimer timer;
         private bool sPort = false;
         private bool mData = false;
         private bool mPlc = false;
+        private bool babyLIN = false;
         private static BitmapImage IFalse = new BitmapImage(new Uri("/Static/01.png", UriKind.Relative));
         private static BitmapImage ITrue = new BitmapImage(new Uri("/Static/02.png", UriKind.Relative));
-        private DispatcherTimer timer;
         private bool dataMark = false;
         private short over = 0;
         private string markBarcode = null;
-        private ILogNet log = new LogNetSingle("D:\\log.txt"); //(Application.StartupPath + "\\Logs\\log.txt");
+        private ILogNet log = new LogNetSingle("C:\\log.txt"); 
 
         public MainWindow()
         {
@@ -52,11 +54,8 @@ namespace DLT_Project
 
             Init();
 
-
-                
-
             //连接ok
-            if (sPort && mData && mPlc)
+            if (sPort && mData && mPlc && babyLIN)
             {
                 CycleDataRead();
             }
@@ -96,11 +95,22 @@ namespace DLT_Project
             resDataOpService = new ResDataOpService(config, log);
             plcDataOpService = new PlcDataOpService(config, log);
 
+            linDataOpService = new LINDataOpService();
+            try
+            {
+                babyLIN = linDataOpService.Initial();
+            }
+            catch (Exception ex)
+            {
+                log.WriteError(ex.Message);
+            }
+
+
             mData = mesDataOpService.GetConnection();
             sPort = resDataOpService.GetConnection();
             mPlc = plcDataOpService.GetConnection();
-            //Lin connection
 
+            LinImage.Source = (babyLIN ? ITrue : IFalse);
             PLCImage.Source = (mPlc ? ITrue : IFalse);
             DataImage.Source = (mData ? ITrue : IFalse);
             PortImage.Source = (sPort ? ITrue : IFalse);
@@ -178,7 +188,6 @@ namespace DLT_Project
                     }
                 }
                 #endregion
-
             };
             timer.Interval = TimeSpan.FromMilliseconds(10);
             timer.Start();
@@ -216,29 +225,31 @@ namespace DLT_Project
         /// <param name="e"></param>
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            float fData = resDataOpService.ReadData();
-            MessageText.Text = fData.ToString();
+            //float fData = resDataOpService.ReadData();
+            //MessageText.Text = fData.ToString();
 
-            //log.WriteInfo("重新连接开始");
-            //if (timer != null && timer.IsEnabled)
-            //{
-            //    timer.Stop();
-            //    timer = null;
-            //}
-            //mesDataOpService.Close();
-            //resDataOpService.Close();
-            //plcDataOpService.Close();
-            //mesDataOpService = null;
-            //resDataOpService = null;
-            //plcDataOpService = null;
-            //config = null;
+            log.WriteInfo("重新连接开始");
+            if (timer != null && timer.IsEnabled)
+            {
+                timer.Stop();
+                timer = null;
+            }
+            mesDataOpService.Close();
+            resDataOpService.Close();
+            plcDataOpService.Close();
+            linDataOpService.DisConnect();
+            mesDataOpService = null;
+            resDataOpService = null;
+            plcDataOpService = null;
+            linDataOpService = null;
+            config = null;
 
-            //Init();
-            ////连接ok
-            //if (sPort && mData && mPlc)
-            //{
-            //    CycleDataRead();
-            //}
+            Init();
+            //连接ok
+            if (sPort && mData && mPlc && babyLIN)
+            {
+                CycleDataRead();
+            }
         }
 
         private void GetLRType(string bar)

@@ -34,7 +34,6 @@ namespace DLT_Project.Services
                 serialPort.DtrEnable = true;
                 serialPort.RtsEnable = true;
                 serialPort.ReadTimeout = 100;
-                //serialPort.NewLine = "\r\n";
                 mark = OpenPort();
             }
             return mark;

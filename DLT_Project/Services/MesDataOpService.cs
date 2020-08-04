@@ -17,7 +17,6 @@ namespace DLT_Project.Services
         private SqlCommand cmd;
         private ILogNet log;
         private string sql = @"insert into Data values (@Barcode,@Type,@WalkInLight,@Heater,@Bukle,@Safety,@SBROff,@SBROn)";
-        //,@Type,@WalkInLight,@Heater,@Bukle,@Safety,@SBROff,@SBROn
 
         public MesDataOpService(ConfigData data, ILogNet log)
         {

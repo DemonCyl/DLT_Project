@@ -24,6 +24,9 @@
                 <Button Content="重新连接" Canvas.Left="245" Canvas.Top="54" Width="75" Click="Button_Click"/>
                 <TextBlock x:Name="MessageText" HorizontalAlignment="Left" Foreground="Black" FontFamily="Microsoft Yahei"  FontSize="11" Background="Yellow"
                     TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="74" Width="297" Canvas.Left="23" Canvas.Top="142"/>
+                <TextBlock x:Name="Lin" HorizontalAlignment="Center" Foreground="#F0E68C" FontFamily="Microsoft Yahei"
+                    TextWrapping="Wrap" Text="LIN状态" VerticalAlignment="Center" Height="16" Width="53" Canvas.Left="178" Canvas.Top="110"/>
+                <Image x:Name="LinImage" Width="15" Height="13" Canvas.Left="245" Canvas.Top="111"/>
             </Canvas>
         </Viewbox>
     </Grid>
