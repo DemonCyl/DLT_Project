@@ -19,8 +19,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
-using HslCommunication;
-using HslCommunication.Profinet.Melsec;
+using HslCommunication.LogNet;
 
 namespace DLT_Project
 {
@@ -45,12 +44,16 @@ namespace DLT_Project
         private bool dataMark = false;
         private short over = 0;
         private string markBarcode = null;
+        private ILogNet log = new LogNetSingle("D:\\log.txt"); //(Application.StartupPath + "\\Logs\\log.txt");
 
         public MainWindow()
         {
             InitializeComponent();
 
             Init();
+
+
+                
 
             //连接ok
             if (sPort && mData && mPlc)
@@ -77,6 +80,9 @@ namespace DLT_Project
 
         private void Init()
         {
+
+            log.SetMessageDegree(HslMessageDegree.ERROR);
+
             LoadJsonData();
 
             #region 时间定时器
@@ -86,9 +92,9 @@ namespace DLT_Project
             ShowTimer.Start();
             #endregion
 
-            mesDataOpService = new MesDataOpService(config);
-            resDataOpService = new ResDataOpService(config);
-            plcDataOpService = new PlcDataOpService(config);
+            mesDataOpService = new MesDataOpService(config, log);
+            resDataOpService = new ResDataOpService(config, log);
+            plcDataOpService = new PlcDataOpService(config, log);
 
             mData = mesDataOpService.GetConnection();
             sPort = resDataOpService.GetConnection();
@@ -115,6 +121,7 @@ namespace DLT_Project
                     dataMark = false;
                 }
                 //判断型号
+                GetLRType(barCode);
                 LRType type = LRType.Left;
 
                 #region 读取Heater信号
@@ -144,13 +151,15 @@ namespace DLT_Project
                 {
                     float fData = resDataOpService.ReadData();
                     //write PLC data
-                    plcDataOpService.WriteRes(fData);
+                    if (fData != -1.1f)
+                    {
+                        plcDataOpService.WriteRes(fData);
+                    }
                 }
                 #endregion
 
                 #region 读取存储信号
                 over = plcDataOpService.ReadSignal(SignalType.OverSignal); ;
-
                 if (over == 1 && !dataMark)
                 {
                     dataMark = true;
@@ -167,7 +176,6 @@ namespace DLT_Project
                         // 回写PLC存储状态 1:成功
                         plcDataOpService.WriteOverBack();
                     }
-
                 }
                 #endregion
 
@@ -208,26 +216,34 @@ namespace DLT_Project
         /// <param name="e"></param>
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            mesDataOpService.Close();
-            resDataOpService.Close();
-            plcDataOpService.Close();
-            mesDataOpService = null;
-            resDataOpService = null;
-            plcDataOpService = null;
-            config = null;
-            if (timer != null && timer.IsEnabled)
-            {
-                timer.Stop();
-                timer = null;
-            }
+            float fData = resDataOpService.ReadData();
+            MessageText.Text = fData.ToString();
 
-            Init();
-            //连接ok
-            if (sPort && mData && mPlc)
-            {
-                CycleDataRead();
-            }
+            //log.WriteInfo("重新连接开始");
+            //if (timer != null && timer.IsEnabled)
+            //{
+            //    timer.Stop();
+            //    timer = null;
+            //}
+            //mesDataOpService.Close();
+            //resDataOpService.Close();
+            //plcDataOpService.Close();
+            //mesDataOpService = null;
+            //resDataOpService = null;
+            //plcDataOpService = null;
+            //config = null;
+
+            //Init();
+            ////连接ok
+            //if (sPort && mData && mPlc)
+            //{
+            //    CycleDataRead();
+            //}
         }
 
+        private void GetLRType(string bar)
+        {
+
+        }
     }
 }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DLT_Project.Entity;
 using HslCommunication;
 using HslCommunication.Profinet.Melsec;
+using HslCommunication.LogNet;
 
 namespace DLT_Project.Services
 {
@@ -13,12 +14,14 @@ namespace DLT_Project.Services
     {
         private ConfigData configData;
         private MelsecMcNet plc;
+        private ILogNet log;
         private OperateResult connect;
         private PLCAddress address = new PLCAddress();
 
-        public PlcDataOpService(ConfigData config)
+        public PlcDataOpService(ConfigData config, ILogNet log)
         {
             this.configData = config;
+            this.log = log;
         }
 
         public bool GetConnection()
@@ -27,6 +30,11 @@ namespace DLT_Project.Services
             plc.ConnectTimeOut = 2000; //超时时间
 
             connect = plc.ConnectServer();
+
+            if (!connect.IsSuccess)
+            {
+                log.WriteError("PLC Connect Error!");
+            }
 
             return connect.IsSuccess;
         }
@@ -46,6 +54,9 @@ namespace DLT_Project.Services
             if (re.IsSuccess)
             {
                 barCode = re.Content;
+            } else
+            {
+                log.WriteError("BarCode Read Error!");
             }
             return barCode;
         }
@@ -71,22 +82,38 @@ namespace DLT_Project.Services
             {
                 signal = re.Content;
             }
+            else
+            {
+                log.WriteError("Signal Read Error!");
+            }
             return signal;
         }
 
         public void WriteOverBack()
         {
-            plc.Write(address.OverBack, (short)1);
+            OperateResult re = plc.Write(address.OverBack, (short)1);
+            if (!re.IsSuccess)
+            {
+                log.WriteError("OverBack Write Error!");
+            }
         }
 
         public void WriteHeaterBack()
         {
-            plc.Write(address.HeaterBack, (short)1);
+            OperateResult re = plc.Write(address.HeaterBack, (short)1);
+            if (!re.IsSuccess)
+            {
+                log.WriteError("HeaterBack Write Error!");
+            }
         }
 
         public void WriteRes(float data)
         {
-            plc.Write(address.ResDataBack, data);
+            OperateResult re = plc.Write(address.ResDataBack, data);
+            if (!re.IsSuccess)
+            {
+                log.WriteError("ResData Write Error!");
+            }
         }
 
         /// <summary>

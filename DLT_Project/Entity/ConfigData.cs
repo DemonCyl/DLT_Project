@@ -26,8 +26,10 @@ namespace DLT_Project.Entity
         public int BaudRate { get; set; }
         #endregion
 
+        #region 三菱Plc配置
         public string PlcIpAdress { get; set; }
 
         public int PlcPort { get; set; }
+        #endregion
     }
 }

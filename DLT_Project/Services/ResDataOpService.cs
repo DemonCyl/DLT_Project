@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using HslCommunication.LogNet;
 
 namespace DLT_Project.Services
 {
@@ -15,11 +16,13 @@ namespace DLT_Project.Services
 
         private SerialPort serialPort;
         private ConfigData config;
+        private ILogNet log;
         private static string cmd = @":FETCH?";
 
-        public ResDataOpService(ConfigData config)
+        public ResDataOpService(ConfigData config, ILogNet log)
         {
             this.config = config;
+            this.log = log;
         }
 
         public bool GetConnection()
@@ -50,11 +53,13 @@ namespace DLT_Project.Services
             }
             if (serialPort.IsOpen)
             {
+                log.WriteInfo("串口连接成功！");
                 return true;
             }
             else
             {
                 MessageBox.Show("串口打开失败!原因为： " + message);
+                log.WriteError("串口打开失败!原因为： " + message);
                 return false;
             }
         }
@@ -83,6 +88,7 @@ namespace DLT_Project.Services
                 }
                 catch (Exception ex)
                 {
+                    log.WriteError(ex.Message);
                 }
             }
             return data;
@@ -93,7 +99,7 @@ namespace DLT_Project.Services
             float data = 0;
             // 00.000E-03  e.g. 00 000 -03
             string[] sArray1 = strData.Split('E');
-            switch (sArray1[1])
+            switch (sArray1[1].Trim())
             {
                 case "-03":
                     data = float.Parse(sArray1[0]) * 0.001f;
@@ -106,6 +112,9 @@ namespace DLT_Project.Services
                     break;
                 case "+06":
                     data = float.Parse(sArray1[0]) * 1000000f;
+                    break;
+                default:
+                    data = float.Parse(sArray1[0]);
                     break;
             }
             return data;
