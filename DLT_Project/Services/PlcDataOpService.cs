@@ -53,12 +53,28 @@ namespace DLT_Project.Services
             OperateResult<string> re = plc.ReadString(address.Barcode, 30);
             if (re.IsSuccess)
             {
-                barCode = re.Content;
-            } else
+                barCode = re.Content.Trim();
+            }
+            else
             {
                 log.WriteError("BarCode Read Error!");
             }
             return barCode;
+        }
+
+        public LRType ReadType()
+        {
+            LRType type = LRType.Null;
+            OperateResult<short> re = plc.ReadInt16(address.Type);
+            if (re.IsSuccess)
+            {
+                type = (LRType) re.Content;
+            }
+            else
+            {
+                log.WriteError("Type Read Error!");
+            }
+            return type;
         }
 
         public short ReadSignal(SignalType type)
@@ -110,6 +126,15 @@ namespace DLT_Project.Services
         public void WriteRes(float data)
         {
             OperateResult re = plc.Write(address.ResDataBack, data);
+            if (!re.IsSuccess)
+            {
+                log.WriteError("ResData Write Error!");
+            }
+        }
+
+        public void WriteSignal(float data)
+        {
+            OperateResult re = plc.Write(address.Signal, data);
             if (!re.IsSuccess)
             {
                 log.WriteError("ResData Write Error!");

@@ -8,7 +8,20 @@ namespace DLT_Project.Entity
 {
     public class PLCAddress
     {
+        /// <summary>
+        /// 条码
+        /// </summary>
         public string Barcode { get { return "D4500"; } }
+
+        /// <summary>
+        /// Left & Right 
+        /// </summary>
+        public string Type { get { return "D5007"; } }
+
+        /// <summary>
+        /// 准备信号
+        /// </summary>
+        public string Signal { get { return "D5008"; } }
 
         /// <summary>
         /// 1:加热；0:停止

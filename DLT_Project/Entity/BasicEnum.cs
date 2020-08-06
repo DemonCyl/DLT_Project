@@ -21,7 +21,17 @@ namespace DLT_Project.Entity
     /// </summary>
     public enum LRType
     {
+        Null = 0,
         Left = 1,
         Right = 2
+    }
+
+    /// <summary>
+    /// 加热信号
+    /// </summary>
+    public enum CmdType
+    {
+        stop = 0,
+        start = 1
     }
 }

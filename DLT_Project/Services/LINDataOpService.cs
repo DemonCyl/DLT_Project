@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using de.lipowsky.LIN.Devices;
+using DLT_Project.Entity;
 
 namespace DLT_Project.Services
 {
@@ -14,9 +15,16 @@ namespace DLT_Project.Services
         private int handle;
         BabyLin.CallBackFrameDelegate frameDelegate;
         private const uint FrameIDForAllFrames = 0xC0000000;
-        private static string stopCmd = "inject 0x01 [0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00] 200 0";
-        private static string leftCmd = "inject 0x01 [0x00 0x00 0xE3 0x00 0x00 0x00 0x00 0x00] 200 0";
-        private static string rightCmd = "inject 0x01 [0x00 0x00 0x00 0xE3 0x00 0x00 0x00 0x00] 200 0";
+        private string stopCmd = "inject 0x02 ";
+        private string leftCmd = "inject 0x02 ";
+        private string rightCmd = "inject 0x02 ";
+
+        public LINDataOpService(ConfigData configData)
+        {
+            this.stopCmd = stopCmd + configData.StopCmd + " 0 0";
+            this.leftCmd = leftCmd + configData.LeftCmd + " 100 0";
+            this.rightCmd = rightCmd + configData.RightCmd + " 100 0";
+        }
 
         //初始化与检测设备的连接
         public bool Initial()
@@ -57,7 +65,7 @@ namespace DLT_Project.Services
             this.frameDelegate = new BabyLin.CallBackFrameDelegate(this.FrameCallbackFunc);
             int ret = BabyLin.BL_registerFrameCallback(this.handle, frameDelegate);
 
-            ret = BabyLin.BL_sendCommand(this.handle, "mon_init 9600 1;");
+            ret = BabyLin.BL_sendCommand(this.handle, "mon_init 19200 1;");
             if (ret != BabyLin.BL_OK)
             {
                 throw new Exception("Could initialize the monitor mode.");
@@ -96,13 +104,30 @@ namespace DLT_Project.Services
             // Write frame data to output
         }
 
-        public void SendCmd()
+        public void SendCmd(LRType type, CmdType cmdType)
         {
-            int ret = BabyLin.BL_sendCommand(this.handle, stopCmd);
+            int ret = 0;
+            switch (cmdType)
+            {
+                case CmdType.start:
+                    if (type == LRType.Left)
+                    {
+                        ret = BabyLin.BL_sendCommand(this.handle, leftCmd);
+                    }
+                    else if (type == LRType.Right)
+                    {
+                        ret = BabyLin.BL_sendCommand(this.handle, rightCmd);
+                    }
+                    break;
+                case CmdType.stop:
+                    ret = BabyLin.BL_sendCommand(this.handle, stopCmd);
+                    break;
+            }
             if (ret != BabyLin.BL_OK)
             {
-                throw new Exception("Could activate the monitor mode");
+                throw new Exception("Send Error!");
             }
         }
+
     }
 }

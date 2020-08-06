@@ -52,13 +52,13 @@ namespace DLT_Project.Services
             }
             if (serialPort.IsOpen)
             {
-                log.WriteInfo("串口连接成功！");
+                log.WriteInfo("电阻计连接成功！");
                 return true;
             }
             else
             {
-                MessageBox.Show("串口打开失败!原因为： " + message);
-                log.WriteError("串口打开失败!原因为： " + message);
+                MessageBox.Show("电阻计打开失败!原因为： " + message);
+                log.WriteError("电阻计打开失败!原因为： " + message);
                 return false;
             }
         }
@@ -88,6 +88,7 @@ namespace DLT_Project.Services
                 catch (Exception ex)
                 {
                     log.WriteError(ex.Message);
+                    throw new Exception(ex.Message);
                 }
             }
             return data;
@@ -113,7 +114,7 @@ namespace DLT_Project.Services
                     data = float.Parse(sArray1[0]) * 1000000f;
                     break;
                 default:
-                    data = float.Parse(sArray1[0]);
+                    data = -1.1f;
                     break;
             }
             return data;

@@ -31,5 +31,9 @@ namespace DLT_Project.Entity
 
         public int PlcPort { get; set; }
         #endregion
+
+        public string StopCmd { get; set; }
+        public string LeftCmd { get; set; }
+        public string RightCmd { get; set; }
     }
 }
