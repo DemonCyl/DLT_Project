@@ -50,7 +50,7 @@ namespace DLT_Project.Services
         public string ReadBarCode()
         {
             string barCode = null;
-            OperateResult<string> re = plc.ReadString(address.Barcode, 30);
+            OperateResult<string> re = plc.ReadString(address.Barcode, 40);
             if (re.IsSuccess)
             {
                 barCode = re.Content.Trim();
@@ -198,6 +198,25 @@ namespace DLT_Project.Services
             }
 
             return info;
+        }
+
+        /// <summary>
+        /// 测试用，可以删
+        /// </summary>
+        /// <returns></returns>
+        public float test()
+        {
+            float t = -1f;
+            OperateResult re = plc.Write("D4000", 100.41f);
+            if (!re.IsSuccess)
+            {
+                log.WriteError("ResData Write Error!");
+            }
+
+            OperateResult<float> ret = plc.ReadFloat("D4000");
+            if (ret.IsSuccess) t = ret.Content;
+
+            return t;
         }
     }
 }

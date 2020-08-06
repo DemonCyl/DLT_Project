@@ -58,12 +58,6 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_C89FA11C20C9BE3DA6AA1A5048D2470B"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_1A2987253873457ABBDD394BB6D507B3"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -83,6 +77,12 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_F867F80473A02CC6208849004A4B7245"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_C89FA11C20C9BE3DA6AA1A5048D2470B"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -107,11 +107,16 @@
             {
             "Enabled" = "11:TRUE"
             "PromptEnabled" = "11:TRUE"
-            "PrerequisitesLocation" = "2:1"
+            "PrerequisitesLocation" = "2:2"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
                 "Items"
                 {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 和 x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
+                    }
                 }
             }
         }
@@ -371,7 +376,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:SetupDLT"
         "ProductCode" = "8:{FC741DCF-01DB-48E1-A512-F3848D0B0E7A}"
-        "PackageCode" = "8:{77D9C83A-463F-40B0-AA30-62E21BEBAA75}"
+        "PackageCode" = "8:{622B31EE-9D24-44F1-9F20-A37779BFA720}"
         "UpgradeCode" = "8:{108387F3-BF64-4976-84D4-56EEEA5E702A}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -906,7 +911,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_1A2987253873457ABBDD394BB6D507B3"
             {
-            "SourcePath" = "8:"
+            "SourcePath" = "8:..\\DLT_Project\\obj\\Debug\\DLT_Project.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_3C7318138BEC443C89522471C2F15908"

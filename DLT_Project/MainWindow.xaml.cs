@@ -60,7 +60,7 @@ namespace DLT_Project
             if (sPort && mData && mPlc && babyLIN)
             {
                 plcDataOpService.WriteSignal(1f);
-                //CycleDataRead();
+                CycleDataRead();
             }
             else
             {
@@ -139,7 +139,7 @@ namespace DLT_Project
                 }
                 //读取型号
                 LRType type = plcDataOpService.ReadType();
-                
+
 
                 #region 读取Heater信号
                 short heater = plcDataOpService.ReadSignal(SignalType.HeaterSignal);
@@ -199,7 +199,7 @@ namespace DLT_Project
                 #endregion
 
                 #region 读取存储信号
-                over = plcDataOpService.ReadSignal(SignalType.OverSignal); ;
+                over = plcDataOpService.ReadSignal(SignalType.OverSignal);
                 if (over == 1 && !dataMark)
                 {
                     dataMark = true;
@@ -370,6 +370,8 @@ namespace DLT_Project
         /// <param name="e"></param>
         private void Button_Click_ReadRes(object sender, RoutedEventArgs e)
         {
+            //float t = plcDataOpService.test();
+            //MessageText.Text = t.ToString();
             try
             {
                 if (sPort)
