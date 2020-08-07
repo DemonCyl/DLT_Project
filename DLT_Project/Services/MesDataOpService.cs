@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using HslCommunication.LogNet;
+using log4net;
 
 namespace DLT_Project.Services
 {
@@ -15,13 +16,12 @@ namespace DLT_Project.Services
         private ConfigData configData;
         private SqlConnection conn;
         private SqlCommand cmd;
-        private ILogNet log;
+        private ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private string sql = @"insert into DLT_DataInfo (Barcode,Type,WalkInLight,Heater,Bukle,Safety,SBROff,SBROn) values (@Barcode,@Type,@WalkInLight,@Heater,@Bukle,@Safety,@SBROff,@SBROn)";
 
-        public MesDataOpService(ConfigData data, ILogNet log)
+        public MesDataOpService(ConfigData data)
         {
             this.configData = data;
-            this.log = log;
         }
         public bool GetConnection()
         {
@@ -34,13 +34,13 @@ namespace DLT_Project.Services
                 {
                     conn = new SqlConnection(sb.ToString());
                     conn.Open();
-                    log.WriteInfo("数据库连接成功");
+                    log.Info("数据库连接成功");
                     mark = true;
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show("数据库连接失败！原因为： " + ex.Message);
-                    log.WriteError("数据库连接失败！原因为： " + ex.Message);
+                    log.Error("数据库连接失败！原因为： " + ex.Message);
                     mark = false;
                 }
             }
@@ -71,7 +71,7 @@ namespace DLT_Project.Services
             }
             catch
             {
-                log.WriteError("存储失败：" + mesInfo.ToString());
+                log.Error("存储失败：" + mesInfo.ToString());
                 mark = false;
             }
             return mark;

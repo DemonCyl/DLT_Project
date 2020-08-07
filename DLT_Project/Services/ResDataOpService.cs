@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using HslCommunication.LogNet;
+using log4net;
 
 namespace DLT_Project.Services
 {
@@ -16,13 +17,12 @@ namespace DLT_Project.Services
 
         private SerialPort serialPort;
         private ConfigData config;
-        private ILogNet log;
+        private ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private static string cmd = @":FETCH?";
 
-        public ResDataOpService(ConfigData config, ILogNet log)
+        public ResDataOpService(ConfigData config)
         {
             this.config = config;
-            this.log = log;
         }
 
         public bool GetConnection()
@@ -52,13 +52,13 @@ namespace DLT_Project.Services
             }
             if (serialPort.IsOpen)
             {
-                log.WriteInfo("电阻计连接成功！");
+                log.Info("电阻计连接成功！");
                 return true;
             }
             else
             {
                 MessageBox.Show("电阻计打开失败!原因为： " + message);
-                log.WriteError("电阻计打开失败!原因为： " + message);
+                log.Error("电阻计打开失败!原因为： " + message);
                 return false;
             }
         }
@@ -87,7 +87,7 @@ namespace DLT_Project.Services
                 }
                 catch (Exception ex)
                 {
-                    log.WriteError(ex.Message);
+                    log.Error(ex.Message);
                     throw new Exception(ex.Message);
                 }
             }

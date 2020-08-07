@@ -21,6 +21,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using HslCommunication.LogNet;
 using System.Diagnostics;
+using log4net;
 
 namespace DLT_Project
 {
@@ -35,12 +36,14 @@ namespace DLT_Project
         private MesDataOpService mesDataOpService;
         private ResDataOpService resDataOpService;
         private PlcDataOpService plcDataOpService;
+        private PlcDataOpService qPlcDataOpService;
         private LINDataOpService linDataOpService;
         private DispatcherTimer ShowTimer;
         private DispatcherTimer timer;
         private bool sPort = false;
         private bool mData = false;
         private bool mPlc = false;
+        private bool qPlc = false;
         private bool babyLIN = false;
         private static BitmapImage IFalse = new BitmapImage(new Uri("/Static/01.png", UriKind.Relative));
         private static BitmapImage ITrue = new BitmapImage(new Uri("/Static/02.png", UriKind.Relative));
@@ -48,24 +51,37 @@ namespace DLT_Project
         private short over = 0;
         private Stopwatch sw = new Stopwatch();
         private string markBarcode = null;
-        private ILogNet log = new LogNetSingle("C:\\log.txt");
+        private ILog iLog = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         public MainWindow()
         {
             InitializeComponent();
 
+            #region 启动时串口最大化显示
+            this.WindowState = WindowState.Maximized;
+            Rect rc = SystemParameters.WorkArea; //获取工作区大小
+            //this.Topmost = true;
+            this.Left = 0; //设置位置
+            this.Top = 0;
+            this.Width = rc.Width;
+            this.Height = rc.Height;
+            #endregion
+
             Init();
 
             //连接ok
-            if (sPort && mData && mPlc && babyLIN)
+            if (sPort && mData && mPlc && babyLIN && qPlc)
             {
                 plcDataOpService.WriteSignal(1f);
+                MessageText.Text = "启动正常！";
                 CycleDataRead();
             }
             else
             {
                 plcDataOpService.WriteSignal(0f);
+                //MessageText.Text = "启动异常！";
             }
+
 
         }
 
@@ -87,7 +103,6 @@ namespace DLT_Project
         private void Init()
         {
 
-            log.SetMessageDegree(HslMessageDegree.ERROR);
 
             LoadJsonData();
 
@@ -98,9 +113,10 @@ namespace DLT_Project
             ShowTimer.Start();
             #endregion
 
-            mesDataOpService = new MesDataOpService(config, log);
-            resDataOpService = new ResDataOpService(config, log);
-            plcDataOpService = new PlcDataOpService(config, log);
+            mesDataOpService = new MesDataOpService(config);
+            resDataOpService = new ResDataOpService(config);
+            plcDataOpService = new PlcDataOpService(config);
+            qPlcDataOpService = new PlcDataOpService(config);
 
             linDataOpService = new LINDataOpService(config);
             try
@@ -109,16 +125,18 @@ namespace DLT_Project
             }
             catch (Exception ex)
             {
-                log.WriteError(ex.Message);
+                iLog.Error(ex.Message);
             }
 
 
             mData = mesDataOpService.GetConnection();
             sPort = resDataOpService.GetConnection();
-            mPlc = plcDataOpService.GetConnection();
+            mPlc = plcDataOpService.GetConnectionFx5u();
+            qPlc = qPlcDataOpService.GetConnectionQ();
 
             LinImage.Source = (babyLIN ? ITrue : IFalse);
-            PLCImage.Source = (mPlc ? ITrue : IFalse);
+            FxPLCImage.Source = (mPlc ? ITrue : IFalse);
+            QPLCImage.Source = (qPlc ? ITrue : IFalse);
             DataImage.Source = (mData ? ITrue : IFalse);
             PortImage.Source = (sPort ? ITrue : IFalse);
         }
@@ -130,15 +148,25 @@ namespace DLT_Project
             timer.Tick += (s, e) =>
             {
                 //读取BarCode
-                string barCode = plcDataOpService.ReadBarCode();
+                string barCode = qPlcDataOpService.ReadBarCode();
                 //初始化状态
                 if (barCode != null && !barCode.Equals("") && !barCode.Equals(markBarcode))
                 {
                     markBarcode = barCode;
                     dataMark = false;
                 }
+                codeText.Text = barCode.Trim();
                 //读取型号
                 LRType type = plcDataOpService.ReadType();
+                switch (type)
+                {
+                    case LRType.Left:
+                        TypeText.Text = "左驾";
+                        break;
+                    case LRType.Right:
+                        TypeText.Text = "右驾";
+                        break;
+                }
 
 
                 #region 读取Heater信号
@@ -152,27 +180,18 @@ namespace DLT_Project
                             case 0:
                                 // 0 发送停止加热 00 00 00 00 00 00 00 00
                                 linDataOpService.SendCmd(type, CmdType.stop);
-                                //if (sw.IsRunning)
-                                //{
-                                //    sw.Stop();
-                                //}
                                 plcDataOpService.WriteHeaterBack();
                                 break;
                             case 1:
                                 //1 发送驱动加热 00 00 ?? ?? 00 00 00 00 // ??->E3  L  R
                                 linDataOpService.SendCmd(type, CmdType.start);
-                                //if (!sw.IsRunning)
-                                //{
-                                //    sw.Start();
-                                //}
-                                plcDataOpService.WriteHeaterBack();
                                 break;
                             default: break;
                         }
                     }
                     catch (Exception ex)
                     {
-                        MessageText.Text = ex.Message;
+                        //MessageText.Text = ex.Message;
                     }
 
                 }
@@ -215,6 +234,7 @@ namespace DLT_Project
                     {
                         // 回写PLC存储状态 1:成功
                         plcDataOpService.WriteOverBack();
+                        MessageText.Text = "该产品检测数据已存入数据库！";
                     }
                 }
                 #endregion
@@ -256,7 +276,7 @@ namespace DLT_Project
         /// <param name="e"></param>
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            log.WriteInfo("重新连接开始");
+            iLog.Info("重新连接开始");
             plcDataOpService.WriteSignal(0f);
             if (timer != null && timer.IsEnabled)
             {
@@ -275,14 +295,16 @@ namespace DLT_Project
 
             Init();
             //连接ok
-            if (sPort && mData && mPlc && babyLIN)
+            if (sPort && mData && mPlc && babyLIN && qPlc)
             {
                 plcDataOpService.WriteSignal(1f);
+                MessageText.Text = "启动正常！";
                 CycleDataRead();
             }
             else
             {
                 plcDataOpService.WriteSignal(0f);
+                MessageText.Text = "启动异常！";
             }
         }
 
@@ -304,6 +326,7 @@ namespace DLT_Project
                 else
                 {
                     MessageText.Text = "未连接Lin！";
+                    iLog.Error("未连接Lin！");
                 }
             }
             catch (Exception ex)
@@ -330,6 +353,7 @@ namespace DLT_Project
                 else
                 {
                     MessageText.Text = "未连接Lin！";
+                    iLog.Error("未连接Lin！");
                 }
             }
             catch (Exception ex)
@@ -355,6 +379,7 @@ namespace DLT_Project
                 else
                 {
                     MessageText.Text = "未连接Lin！";
+                    iLog.Error("未连接Lin！");
                 }
             }
             catch (Exception ex)
@@ -370,24 +395,25 @@ namespace DLT_Project
         /// <param name="e"></param>
         private void Button_Click_ReadRes(object sender, RoutedEventArgs e)
         {
-            //float t = plcDataOpService.test();
-            //MessageText.Text = t.ToString();
-            try
-            {
-                if (sPort)
-                {
-                    float fData = resDataOpService.ReadData();
-                    MessageText.Text = "电阻值为：" + fData.ToString() + "Ω";
-                }
-                else
-                {
-                    MessageText.Text = "未连接电阻计！";
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageText.Text = ex.Message;
-            }
+            float t = qPlcDataOpService.test();
+            MessageText.Text = t.ToString();
+            //try
+            //{
+            //    if (sPort)
+            //    {
+            //        float fData = resDataOpService.ReadData();
+            //        MessageText.Text = "电阻值为：" + fData.ToString() + "Ω";
+            //    }
+            //    else
+            //    {
+            //        MessageText.Text = "未连接电阻计！";
+            //        iLog.Error("未连接电阻计！");
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageText.Text = ex.Message;
+            //}
         }
     }
 }

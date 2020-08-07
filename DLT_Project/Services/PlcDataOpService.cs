@@ -7,6 +7,7 @@ using DLT_Project.Entity;
 using HslCommunication;
 using HslCommunication.Profinet.Melsec;
 using HslCommunication.LogNet;
+using log4net;
 
 namespace DLT_Project.Services
 {
@@ -14,26 +15,42 @@ namespace DLT_Project.Services
     {
         private ConfigData configData;
         private MelsecMcNet plc;
-        private ILogNet log;
+        private ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private OperateResult connect;
         private PLCAddress address = new PLCAddress();
 
-        public PlcDataOpService(ConfigData config, ILogNet log)
+        public PlcDataOpService(ConfigData config)
         {
             this.configData = config;
-            this.log = log;
         }
 
-        public bool GetConnection()
+        public bool GetConnectionFx5u()
         {
-            plc = new MelsecMcNet(configData.PlcIpAdress, configData.PlcPort);
+            plc = new MelsecMcNet(configData.Fx5uPlcIpAdress, configData.Fx5uPlcPort);
             plc.ConnectTimeOut = 2000; //超时时间
 
             connect = plc.ConnectServer();
 
             if (!connect.IsSuccess)
             {
-                log.WriteError("PLC Connect Error!");
+                log.Error("Fx5uPLC Connect Error!");
+            }
+
+            return connect.IsSuccess;
+        }
+
+        public bool GetConnectionQ()
+        {
+            plc = new MelsecMcNet(configData.QPlcIpAdress, configData.QPlcPort);
+            plc.ConnectTimeOut = 2000; //超时时间
+            plc.NetworkNumber = 0x00;  // 网络号
+            plc.NetworkStationNumber = 0x00; // 网络站号
+
+            connect = plc.ConnectServer();
+
+            if (!connect.IsSuccess)
+            {
+                log.Error("QPLC Connect Error!");
             }
 
             return connect.IsSuccess;
@@ -57,7 +74,7 @@ namespace DLT_Project.Services
             }
             else
             {
-                log.WriteError("BarCode Read Error!");
+                log.Error("BarCode Read Error!");
             }
             return barCode;
         }
@@ -72,7 +89,7 @@ namespace DLT_Project.Services
             }
             else
             {
-                log.WriteError("Type Read Error!");
+                log.Error("Type Read Error!");
             }
             return type;
         }
@@ -100,7 +117,7 @@ namespace DLT_Project.Services
             }
             else
             {
-                log.WriteError("Signal Read Error!");
+                log.Error("Signal Read Error!");
             }
             return signal;
         }
@@ -110,7 +127,7 @@ namespace DLT_Project.Services
             OperateResult re = plc.Write(address.OverBack, (short)1);
             if (!re.IsSuccess)
             {
-                log.WriteError("OverBack Write Error!");
+                log.Error("OverBack Write Error!");
             }
         }
 
@@ -119,7 +136,7 @@ namespace DLT_Project.Services
             OperateResult re = plc.Write(address.HeaterBack, (short)1);
             if (!re.IsSuccess)
             {
-                log.WriteError("HeaterBack Write Error!");
+                log.Error("HeaterBack Write Error!");
             }
         }
 
@@ -128,7 +145,7 @@ namespace DLT_Project.Services
             OperateResult re = plc.Write(address.ResDataBack, data);
             if (!re.IsSuccess)
             {
-                log.WriteError("ResData Write Error!");
+                log.Error("ResData Write Error!");
             }
         }
 
@@ -137,7 +154,7 @@ namespace DLT_Project.Services
             OperateResult re = plc.Write(address.Signal, data);
             if (!re.IsSuccess)
             {
-                log.WriteError("ResData Write Error!");
+                log.Error("Signal Write Error!");
             }
         }
 
@@ -207,13 +224,13 @@ namespace DLT_Project.Services
         public float test()
         {
             float t = -1f;
-            OperateResult re = plc.Write("D4000", 100.41f);
-            if (!re.IsSuccess)
-            {
-                log.WriteError("ResData Write Error!");
-            }
+            //OperateResult re = plc.Write("D4000", 100.41f);
+            //if (!re.IsSuccess)
+            //{
+            //    log.Error("ResData Write Error!");
+            //}
 
-            OperateResult<float> ret = plc.ReadFloat("D4000");
+            OperateResult<float> ret = plc.ReadFloat("D88");
             if (ret.IsSuccess) t = ret.Content;
 
             return t;

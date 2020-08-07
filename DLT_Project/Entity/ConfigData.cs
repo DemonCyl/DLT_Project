@@ -27,9 +27,13 @@ namespace DLT_Project.Entity
         #endregion
 
         #region 三菱Plc配置
-        public string PlcIpAdress { get; set; }
+        public string Fx5uPlcIpAdress { get; set; }
 
-        public int PlcPort { get; set; }
+        public int Fx5uPlcPort { get; set; }
+
+        public string QPlcIpAdress { get; set; }
+
+        public int QPlcPort { get; set; }
         #endregion
 
         public string StopCmd { get; set; }

@@ -6,31 +6,83 @@
         xmlns:local="clr-namespace:DLT_Project"
         mc:Ignorable="d"
         Closing="Window_Closing"
-        Title="MainWindow" Height="300" Width="350">
+        Title="MainWindow" Height="384" Width="532">
     <Grid Background="SteelBlue">
         <Viewbox VerticalAlignment="Top" >
-            <Canvas x:Name="Canvas1" Width="350" Height="275">
-                <TextBlock x:Name="TM" HorizontalAlignment="Left" Grid.Row="3" Foreground="#F0E68C" FontFamily="Microsoft Yahei" 
-                           TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="33" Width="199" Canvas.Left="40" Canvas.Top="10"/>
+            <Canvas x:Name="Canvas1" Width="572" Height="383">
+                <Border VerticalAlignment="Center" HorizontalAlignment="Center" CornerRadius="0" BorderThickness="2" Height="123" Width="208" Canvas.Top="98" Canvas.Left="350">
+                    <Border.BorderBrush>
+                        <LinearGradientBrush SpreadMethod="Repeat" StartPoint="0, 5" EndPoint="5, 0" MappingMode="Absolute">
+                            <LinearGradientBrush.GradientStops>
+                                <GradientStop Color="White" Offset="0"/>
+                            </LinearGradientBrush.GradientStops>
+                        </LinearGradientBrush>
+                    </Border.BorderBrush>
+                </Border>
+                <Border VerticalAlignment="Center" HorizontalAlignment="Center" CornerRadius="0" BorderThickness="2" Height="123" Width="321" Canvas.Top="98" Canvas.Left="11">
+                    <Border.BorderBrush>
+                        <LinearGradientBrush SpreadMethod="Repeat" StartPoint="0, 5" EndPoint="5, 0" MappingMode="Absolute">
+                            <LinearGradientBrush.GradientStops>
+                                <GradientStop Color="White" Offset="0"/>
+                            </LinearGradientBrush.GradientStops>
+                        </LinearGradientBrush>
+                    </Border.BorderBrush>
+                </Border>
+                <Border VerticalAlignment="Center" HorizontalAlignment="Center" CornerRadius="0" BorderThickness="2" Height="118" Width="551" Canvas.Top="245" Canvas.Left="11">
+                    <Border.BorderBrush>
+                        <LinearGradientBrush SpreadMethod="Repeat" StartPoint="0, 5" EndPoint="5, 0" MappingMode="Absolute">
+                            <GradientStop Color="White" Offset="0"/>
+                        </LinearGradientBrush>
+                    </Border.BorderBrush>
+                </Border>
+                <Border VerticalAlignment="Center" HorizontalAlignment="Center" CornerRadius="0" BorderThickness="2" Height="54" Width="547" Canvas.Top="13" Canvas.Left="11">
+                    <Border.BorderBrush>
+                        <LinearGradientBrush SpreadMethod="Repeat" StartPoint="0, 5" EndPoint="5, 0" MappingMode="Absolute">
+                            <GradientStop Color="White" Offset="0"/>
+                        </LinearGradientBrush>
+                    </Border.BorderBrush>
+                </Border>
+                <Canvas Width="117" Height="48"  Canvas.Left="15" Canvas.Top="16" Background="White">
+                    <Image x:Name="Logo"   />
+                </Canvas>
+                <TextBlock x:Name="TM" HorizontalAlignment="Left" Grid.Row="3" Foreground="#F0E68C" FontFamily="Microsoft Yahei"  TextAlignment="Right"
+                           TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="44" Width="372" Canvas.Left="177" Canvas.Top="17"/>
                 <TextBlock x:Name="PLCSta" HorizontalAlignment="Center" Foreground="#F0E68C" FontFamily="Microsoft Yahei" TextAlignment="Right"
-                    TextWrapping="Wrap" Text="PLC状态" VerticalAlignment="Center" Height="16" Width="53" Canvas.Left="40" Canvas.Top="68"/>
-                <Image x:Name="PLCImage" Width="15" Height="13" Canvas.Left="98" Canvas.Top="71"/>
+                    TextWrapping="Wrap" Text="主线PLC状态" VerticalAlignment="Center" Height="16" Width="70" Canvas.Left="27" Canvas.Top="115"/>
+                <Image x:Name="QPLCImage" Width="15" Height="13" Canvas.Left="102" Canvas.Top="118"/>
                 <TextBlock x:Name="DataSta" HorizontalAlignment="Center" Foreground="#F0E68C" FontFamily="Microsoft Yahei" TextAlignment="Right"
-                    TextWrapping="Wrap" Text="数据库状态" VerticalAlignment="Center" Height="16" Width="66" Canvas.Left="27" Canvas.Top="89"/>
+                    TextWrapping="Wrap" Text="数据库状态" VerticalAlignment="Center" Height="16" Width="66" Canvas.Left="31" Canvas.Top="177"/>
                 <TextBlock x:Name="PortSta" HorizontalAlignment="Center" Foreground="#F0E68C" FontFamily="Microsoft Yahei" TextAlignment="Right"
-                    TextWrapping="Wrap" Text="电阻计状态" VerticalAlignment="Center" Height="16" Width="53" Canvas.Left="40" Canvas.Top="110"/>
-                <Image x:Name="DataImage" Width="15" Height="13" Canvas.Left="98" Canvas.Top="92"/>
-                <Image x:Name="PortImage" Width="15" Height="13" Canvas.Left="98" Canvas.Top="111"/>
-                <Button Content="重新连接" Canvas.Left="245" Canvas.Top="17" Width="75" Click="Button_Click"/>
-                <TextBlock x:Name="MessageText" HorizontalAlignment="Left" Foreground="Black" FontFamily="Microsoft Yahei"  FontSize="18" Background="Yellow"
-                    TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="74" Width="297" Canvas.Left="23" Canvas.Top="158"/>
+                    TextWrapping="Wrap" Text="电阻计状态" VerticalAlignment="Center" Height="16" Width="66" Canvas.Left="195" Canvas.Top="115"/>
+                <Image x:Name="DataImage" Width="15" Height="13" Canvas.Left="102" Canvas.Top="180"/>
+                <Image x:Name="PortImage" Width="15" Height="13" Canvas.Left="266" Canvas.Top="116"/>
+                <Button Content="重新连接" Canvas.Left="376" Canvas.Top="150" Width="75" Click="Button_Click"/>
+
+                <TextBlock x:Name="MessageText" HorizontalAlignment="Left" Foreground="Black" FontFamily="Microsoft Yahei"  FontSize="16" Background="Yellow"
+                    TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="77" Width="539" Canvas.Left="17" Canvas.Top="279"/>
                 <TextBlock x:Name="Lin" HorizontalAlignment="Center" Foreground="#F0E68C" FontFamily="Microsoft Yahei" TextAlignment="Right"
-                    TextWrapping="Wrap" Text="LIN状态" VerticalAlignment="Center" Height="16" Width="53" Canvas.Left="40" Canvas.Top="131"/>
-                <Image x:Name="LinImage" Width="15" Height="13" Canvas.Left="98" Canvas.Top="131"/>
-                <Button x:Name="LeftHeater" Content="左加热" Canvas.Left="245" Canvas.Top="44" Width="75" Click="Button_Click_LeftHeater"/>
-                <Button x:Name="RightHeater" Content="右加热" Canvas.Left="245" Canvas.Top="71" Width="75" Click="Button_Click_RightHeater"/>
-                <Button x:Name="StopHeater" Content="停止加热" Canvas.Left="245" Canvas.Top="98" Width="75" Click="Button_Click_StopHeater"/>
-                <Button x:Name="ReadRes" Content="读取电阻值" Canvas.Left="245" Canvas.Top="125" Width="75" Click="Button_Click_ReadRes"/>
+                    TextWrapping="Wrap" Text="LIN状态" VerticalAlignment="Center" Height="16" Width="53" Canvas.Left="208" Canvas.Top="145"/>
+                <Image x:Name="LinImage" Width="15" Height="13" Canvas.Left="266" Canvas.Top="146"/>
+                <Button x:Name="LeftHeater" Content="左加热" Canvas.Left="468" Canvas.Top="117" Width="75" Click="Button_Click_LeftHeater"/>
+                <Button x:Name="RightHeater" Content="右加热" Canvas.Left="468" Canvas.Top="150" Width="75" Click="Button_Click_RightHeater"/>
+                <Button x:Name="StopHeater" Content="停止加热" Canvas.Left="468" Canvas.Top="186" Width="75" Click="Button_Click_StopHeater"/>
+                <Button x:Name="ReadRes" Content="读取电阻值" Canvas.Left="376" Canvas.Top="186" Width="75" Click="Button_Click_ReadRes"/>
+                <TextBlock x:Name="PLCSta_Copy" HorizontalAlignment="Center" Foreground="#F0E68C" FontFamily="Microsoft Yahei" TextAlignment="Right"
+                    TextWrapping="Wrap" Text="检测PLC状态" VerticalAlignment="Center" Height="16" Width="78" Canvas.Left="19" Canvas.Top="145"/>
+                <Image x:Name="FxPLCImage" Width="15" Height="13" Canvas.Left="102" Canvas.Top="147"/>
+                <TextBlock x:Name="Lin_Copy" HorizontalAlignment="Center" Foreground="#F0E68C" FontFamily="Microsoft Yahei" TextAlignment="Right"
+                    TextWrapping="Wrap" Text="条码：" VerticalAlignment="Center" Height="16" Width="40" Canvas.Left="17" Canvas.Top="248"/>
+                <TextBlock x:Name="Lin_Copy1" HorizontalAlignment="Center" Foreground="#F0E68C" FontFamily="Microsoft Yahei" TextAlignment="Right"
+                    TextWrapping="Wrap" Text="型号：" VerticalAlignment="Center" Height="16" Width="53" Canvas.Left="434" Canvas.Top="249"/>
+                <TextBlock x:Name="codeText" HorizontalAlignment="Center" Foreground="#F0E68C" FontFamily="Microsoft Yahei" TextAlignment="Left"
+                    TextWrapping="Wrap" Text="" VerticalAlignment="Center" Height="16" Width="264" Canvas.Left="68" Canvas.Top="248"/>
+                <TextBlock x:Name="TypeText" HorizontalAlignment="Center" Foreground="#F0E68C" FontFamily="Microsoft Yahei" TextAlignment="Left"
+                    TextWrapping="Wrap" Text="" VerticalAlignment="Center" Height="16" Width="53" Canvas.Left="496" Canvas.Top="249"/>
+                <TextBlock x:Name="PortSta_Copy" HorizontalAlignment="Center" Foreground="#F0E68C" FontFamily="Microsoft Yahei" TextAlignment="Right"
+                    TextWrapping="Wrap" Text="功能:" FontSize="15"  VerticalAlignment="Center" Height="18" Width="41" Canvas.Left="350" Canvas.Top="72"/>
+                <TextBlock x:Name="PortSta_Copy1" HorizontalAlignment="Center" Foreground="#F0E68C" FontFamily="Microsoft Yahei" TextAlignment="Right"
+                    TextWrapping="Wrap" Text="状态:" FontSize="15"  VerticalAlignment="Center" Height="18" Width="39" Canvas.Left="13" Canvas.Top="72"/>
+
             </Canvas>
         </Viewbox>
     </Grid>
