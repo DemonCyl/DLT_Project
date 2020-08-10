@@ -1,8 +1,19 @@
-﻿{
+{
   "DataIpAdress": "127.0.0.1",
-  "DataBaseName": "CylTest",
+  "DataBaseName": "DLT",
   "Uid": "sa",
   "Pwd": "123456",
-  "PortName": "COM1",
-  "BaudRate": 9600
+  
+  "PortName": "COM6",
+  "BaudRate": 9600,
+
+  "Fx5uPlcIpAdress": "192.168.0.108",
+  "Fx5uPlcPort": 3000,
+
+  "QPlcIpAdress": "192.168.0.190",
+  "QPlcPort": 5018,
+
+  "StopCmd": "0x01 [0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00]",
+  "LeftCmd": "0x01 [0x00 0x00 0xE3 0x00 0x00 0x00 0x00 0x00]",
+  "RightCmd":"0x01 [0x00 0x00 0x00 0xE3 0x00 0x00 0x00 0x00]"
 }

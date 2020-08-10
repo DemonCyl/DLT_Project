@@ -1,0 +1,29 @@
+{
+  "Barcode": "D6570",
+  "BarcodeLength":25,
+  "Type": "D5007",
+  "Signal": "D5008",
+
+  "HeaterSignal": "D5000",
+  "HeaterBack": "D5001",
+
+  "ResSignal": "D5002",
+  "ResDataBack": "D5003",
+
+  "OverSignal": "D5005",
+  "OverBack": "D5006",
+
+  "LHeater": "D4000",
+  "LSBROn": "D4002",
+  "LSafety": "D4004",
+  "LWalkIn": "D4006",
+  "LBukle": "D4008",
+  "LSBROff": "D4009",
+
+  "RHeater": "D4100",
+  "RSBROn": "D4102",
+  "RSafety": "D4104",
+  "RWalkIn": "D4106",
+  "RBukle": "D4108",
+  "RSBROff": "D4109"
+}

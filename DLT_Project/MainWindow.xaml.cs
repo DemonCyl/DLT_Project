@@ -32,6 +32,7 @@ namespace DLT_Project
     {
 
         private ConfigData config;
+        private PLCAddress address;
         private MesInfo mesInfo;
         private MesDataOpService mesDataOpService;
         private ResDataOpService resDataOpService;
@@ -47,6 +48,7 @@ namespace DLT_Project
         private bool babyLIN = false;
         private static BitmapImage IFalse = new BitmapImage(new Uri("/Static/01.png", UriKind.Relative));
         private static BitmapImage ITrue = new BitmapImage(new Uri("/Static/02.png", UriKind.Relative));
+        private static BitmapImage logo = new BitmapImage(new Uri("/Static/logo.png", UriKind.Relative));
         private bool dataMark = false;
         private short over = 0;
         private Stopwatch sw = new Stopwatch();
@@ -70,16 +72,39 @@ namespace DLT_Project
             Init();
 
             //连接ok
-            if (sPort && mData && mPlc && babyLIN && qPlc)
+            if (config.DebugMode) // 调试模式
             {
-                plcDataOpService.WriteSignal(1f);
-                MessageText.Text = "启动正常！";
-                CycleDataRead();
+                iLog.Info("--------------调试模式开启-------------");
+                if (mData && qPlc)
+                {
+                    plcDataOpService.WriteSignal(1f);
+                    MessageText.Text = "调试启动正常！";
+                    iLog.Info("调试启动正常！");
+                    CycleDataRead();
+                }
+                else
+                {
+                    plcDataOpService.WriteSignal(2f);
+                    MessageText.Text = "调试启动异常！";
+                    iLog.Info("调试启动异常！");
+                }
             }
-            else
+            else  // 正式运行环境
             {
-                plcDataOpService.WriteSignal(0f);
-                //MessageText.Text = "启动异常！";
+                iLog.Info("--------------正式模式开启-------------");
+                if (mData && mPlc && qPlc && babyLIN && sPort)
+                {
+                    plcDataOpService.WriteSignal(1f);
+                    MessageText.Text = "启动正常！";
+                    iLog.Info("启动正常！");
+                    CycleDataRead();
+                }
+                else
+                {
+                    plcDataOpService.WriteSignal(2f);
+                    MessageText.Text = "启动异常！";
+                    iLog.Info("启动异常！");
+                }
             }
 
 
@@ -96,6 +121,15 @@ namespace DLT_Project
                 if (config == null)
                 {
                     config = JsonConvert.DeserializeObject<ConfigData>(JsonStr);
+                }
+            }
+
+            using (var sr = File.OpenText("C:\\config\\DLTAddress.json"))
+            {
+                string JsonStr1 = sr.ReadToEnd();
+                if (address == null)
+                {
+                    address = JsonConvert.DeserializeObject<PLCAddress>(JsonStr1);
                 }
             }
         }
@@ -115,10 +149,10 @@ namespace DLT_Project
 
             mesDataOpService = new MesDataOpService(config);
             resDataOpService = new ResDataOpService(config);
-            plcDataOpService = new PlcDataOpService(config);
-            qPlcDataOpService = new PlcDataOpService(config);
-
+            plcDataOpService = new PlcDataOpService(config, address);
+            qPlcDataOpService = new PlcDataOpService(config, address);
             linDataOpService = new LINDataOpService(config);
+
             try
             {
                 babyLIN = linDataOpService.Initial();
@@ -127,7 +161,6 @@ namespace DLT_Project
             {
                 iLog.Error(ex.Message);
             }
-
 
             mData = mesDataOpService.GetConnection();
             sPort = resDataOpService.GetConnection();
@@ -139,6 +172,7 @@ namespace DLT_Project
             QPLCImage.Source = (qPlc ? ITrue : IFalse);
             DataImage.Source = (mData ? ITrue : IFalse);
             PortImage.Source = (sPort ? ITrue : IFalse);
+            Logo.Source = logo;
         }
 
         private void CycleDataRead()
@@ -152,9 +186,11 @@ namespace DLT_Project
                 //初始化状态
                 if (barCode != null && !barCode.Equals("") && !barCode.Equals(markBarcode))
                 {
+
                     markBarcode = barCode;
                     dataMark = false;
                 }
+
                 codeText.Text = barCode.Trim();
                 //读取型号
                 LRType type = plcDataOpService.ReadType();
@@ -192,6 +228,7 @@ namespace DLT_Project
                     catch (Exception ex)
                     {
                         //MessageText.Text = ex.Message;
+                        iLog.Error(ex.Message);
                     }
 
                 }
@@ -212,7 +249,8 @@ namespace DLT_Project
                     }
                     catch (Exception ex)
                     {
-                        MessageText.Text = ex.Message;
+                        //MessageText.Text = ex.Message;
+                        iLog.Error(ex.Message);
                     }
                 }
                 #endregion
@@ -221,25 +259,33 @@ namespace DLT_Project
                 over = plcDataOpService.ReadSignal(SignalType.OverSignal);
                 if (over == 1 && !dataMark)
                 {
-                    dataMark = true;
-                    // 读取测试数据资料
-                    mesInfo = plcDataOpService.GetInfo(barCode, type);
-                    // 存储MES数据
-                    bool t = mesDataOpService.DataInsert(mesInfo);
-                    if (!t) // 存储失败继续下一次存储直到成功
+
+
+                    if (barCode != null && barCode.Equals(""))
                     {
-                        dataMark = false;
-                    }
-                    else
-                    {
-                        // 回写PLC存储状态 1:成功
-                        plcDataOpService.WriteOverBack();
-                        MessageText.Text = "该产品检测数据已存入数据库！";
+                        dataMark = true;
+                        // 读取测试数据资料
+                        mesInfo = plcDataOpService.GetInfo(barCode, type);
+                        // 存储MES数据
+                        bool t = mesDataOpService.DataInsert(mesInfo);
+                        if (!t) // 存储失败继续下一次存储直到成功
+                        {
+                            dataMark = false;
+                        }
+                        else
+                        {
+                            // 回写PLC存储状态 1:成功
+                            plcDataOpService.WriteOverBack();
+                            MessageText.Text = "该产品检测数据已存入数据库！";
+                            iLog.Info(string.Format("该产品{0}检测数据已存入数据库！", barCode.Trim()));
+                        }
                     }
                 }
                 #endregion
+
+
             };
-            timer.Interval = TimeSpan.FromMilliseconds(50);
+            timer.Interval = TimeSpan.FromMilliseconds(100);
             timer.Start();
         }
 
@@ -248,9 +294,9 @@ namespace DLT_Project
             this.TM.Text = " ";
             //获得年月日 
             this.TM.Text += DateTime.Now.ToString("yyyy年MM月dd日");   //yyyy年MM月dd日 
-            this.TM.Text += "\r\n       ";
+            this.TM.Text += "                  \r\n       ";
             //获得时分秒 
-            this.TM.Text += DateTime.Now.ToString("HH:mm:ss");
+            this.TM.Text += DateTime.Now.ToString("HH:mm");
             this.TM.Text += "              ";
             this.TM.Text += DateTime.Now.ToString("dddd", new System.Globalization.CultureInfo("zh-cn"));
             this.TM.Text += " ";
@@ -263,7 +309,7 @@ namespace DLT_Project
         /// <param name="e"></param>
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            plcDataOpService.WriteSignal(0f);
+            plcDataOpService.WriteSignal(2f);
             mesDataOpService.Close();
             resDataOpService.Close();
             plcDataOpService.Close();
@@ -277,7 +323,7 @@ namespace DLT_Project
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             iLog.Info("重新连接开始");
-            plcDataOpService.WriteSignal(0f);
+            plcDataOpService.WriteSignal(2f);
             if (timer != null && timer.IsEnabled)
             {
                 timer.Stop();
@@ -286,25 +332,50 @@ namespace DLT_Project
             mesDataOpService.Close();
             resDataOpService.Close();
             plcDataOpService.Close();
+            qPlcDataOpService.Close();
             linDataOpService.DisConnect();
             mesDataOpService = null;
             resDataOpService = null;
             plcDataOpService = null;
             linDataOpService = null;
+            qPlcDataOpService = null;
             config = null;
 
             Init();
             //连接ok
-            if (sPort && mData && mPlc && babyLIN && qPlc)
+            if (config.DebugMode) // 调试模式
             {
-                plcDataOpService.WriteSignal(1f);
-                MessageText.Text = "启动正常！";
-                CycleDataRead();
+                iLog.Info("--------------调试模式开启-------------");
+                if (mData && qPlc)
+                {
+                    plcDataOpService.WriteSignal(1f);
+                    MessageText.Text = "调试启动正常！";
+                    iLog.Info("调试启动正常！");
+                    CycleDataRead();
+                }
+                else
+                {
+                    plcDataOpService.WriteSignal(2f);
+                    MessageText.Text = "调试启动异常！";
+                    iLog.Info("调试启动异常！");
+                }
             }
-            else
+            else  // 正式运行环境
             {
-                plcDataOpService.WriteSignal(0f);
-                MessageText.Text = "启动异常！";
+                iLog.Info("--------------正式模式开启-------------");
+                if (mData && mPlc && qPlc && babyLIN && sPort)
+                {
+                    plcDataOpService.WriteSignal(1f);
+                    MessageText.Text = "启动正常！";
+                    iLog.Info("启动正常！");
+                    CycleDataRead();
+                }
+                else
+                {
+                    plcDataOpService.WriteSignal(2f);
+                    MessageText.Text = "启动异常！";
+                    iLog.Info("启动异常！");
+                }
             }
         }
 
@@ -395,25 +466,29 @@ namespace DLT_Project
         /// <param name="e"></param>
         private void Button_Click_ReadRes(object sender, RoutedEventArgs e)
         {
-            float t = qPlcDataOpService.test();
-            MessageText.Text = t.ToString();
-            //try
-            //{
-            //    if (sPort)
-            //    {
-            //        float fData = resDataOpService.ReadData();
-            //        MessageText.Text = "电阻值为：" + fData.ToString() + "Ω";
-            //    }
-            //    else
-            //    {
-            //        MessageText.Text = "未连接电阻计！";
-            //        iLog.Error("未连接电阻计！");
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageText.Text = ex.Message;
-            //}
+            //float t = qPlcDataOpService.test();
+            //MessageText.Text = t.ToString();
+            //string test = qPlcDataOpService.ReadBarCode();
+            //MessageText.Text = test.Trim();
+            //iLog.Info(test.Trim() + "12");
+
+            try
+            {
+                if (sPort)
+                {
+                    float fData = resDataOpService.ReadData();
+                    MessageText.Text = "电阻值为：" + fData.ToString() + "Ω";
+                }
+                else
+                {
+                    MessageText.Text = "未连接电阻计！";
+                    iLog.Error("未连接电阻计！");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageText.Text = ex.Message;
+            }
         }
     }
 }

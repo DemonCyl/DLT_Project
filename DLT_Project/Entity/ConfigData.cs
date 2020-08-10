@@ -9,6 +9,10 @@ namespace DLT_Project.Entity
     public class ConfigData
     {
 
+        /// <summary>
+        /// 调试模式：1: 打开  0:关闭
+        /// </summary>
+        public bool DebugMode { get; set; }
 
         #region 数据库配置
         public string DataIpAdress { get; set; }

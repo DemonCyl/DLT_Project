@@ -136,11 +136,12 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="packages.config" />
-    <None Include="Static\DLTConfig.json" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <None Include="Static\DLTAddress.json" />
+    <None Include="Static\DLTConfig.json" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -155,6 +156,7 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Static\logo.png" />
     <None Include="lib\BabyLIN.dll" />
     <Content Include="lib\Lipowsky.LIN.Devices.dll" />
     <Resource Include="lib\Lipowsky.LIN.Devices.XML" />

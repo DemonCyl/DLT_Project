@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:DLT_Project"
         mc:Ignorable="d"
         Closing="Window_Closing"
-        Title="MainWindow" Height="384" Width="532">
+        Title="主界面" Height="384" Width="532">
     <Grid Background="SteelBlue">
         <Viewbox VerticalAlignment="Top" >
             <Canvas x:Name="Canvas1" Width="572" Height="383">
@@ -42,11 +42,11 @@
                         </LinearGradientBrush>
                     </Border.BorderBrush>
                 </Border>
-                <Canvas Width="117" Height="48"  Canvas.Left="15" Canvas.Top="16" Background="White">
-                    <Image x:Name="Logo"   />
+                <Canvas Width="120" Height="48"  Canvas.Left="15" Canvas.Top="16" Background="White">
+                    <Image x:Name="Logo"  Width="120" Height="48" Stretch="Fill" />
                 </Canvas>
                 <TextBlock x:Name="TM" HorizontalAlignment="Left" Grid.Row="3" Foreground="#F0E68C" FontFamily="Microsoft Yahei"  TextAlignment="Right"
-                           TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="44" Width="372" Canvas.Left="177" Canvas.Top="17"/>
+                           TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="44" Width="372" Canvas.Left="164" Canvas.Top="18"/>
                 <TextBlock x:Name="PLCSta" HorizontalAlignment="Center" Foreground="#F0E68C" FontFamily="Microsoft Yahei" TextAlignment="Right"
                     TextWrapping="Wrap" Text="主线PLC状态" VerticalAlignment="Center" Height="16" Width="70" Canvas.Left="27" Canvas.Top="115"/>
                 <Image x:Name="QPLCImage" Width="15" Height="13" Canvas.Left="102" Canvas.Top="118"/>

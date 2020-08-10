@@ -57,7 +57,7 @@ namespace DLT_Project.Services
             }
             else
             {
-                MessageBox.Show("电阻计打开失败!原因为： " + message);
+                //MessageBox.Show("电阻计打开失败!原因为： " + message);
                 log.Error("电阻计打开失败!原因为： " + message);
                 return false;
             }

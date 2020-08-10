@@ -39,7 +39,7 @@ namespace DLT_Project.Services
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("数据库连接失败！原因为： " + ex.Message);
+                    //MessageBox.Show("数据库连接失败！原因为： " + ex.Message);
                     log.Error("数据库连接失败！原因为： " + ex.Message);
                     mark = false;
                 }

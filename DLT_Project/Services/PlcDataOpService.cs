@@ -17,11 +17,12 @@ namespace DLT_Project.Services
         private MelsecMcNet plc;
         private ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private OperateResult connect;
-        private PLCAddress address = new PLCAddress();
+        private PLCAddress address;
 
-        public PlcDataOpService(ConfigData config)
+        public PlcDataOpService(ConfigData config, PLCAddress plcAddress)
         {
             this.configData = config;
+            this.address = plcAddress;
         }
 
         public bool GetConnectionFx5u()
@@ -33,7 +34,7 @@ namespace DLT_Project.Services
 
             if (!connect.IsSuccess)
             {
-                log.Error("Fx5uPLC Connect Error!");
+                log.Error("检测PLC Connect Error!");
             }
 
             return connect.IsSuccess;
@@ -50,7 +51,7 @@ namespace DLT_Project.Services
 
             if (!connect.IsSuccess)
             {
-                log.Error("QPLC Connect Error!");
+                log.Error("主线PLC Connect Error!");
             }
 
             return connect.IsSuccess;
@@ -67,10 +68,11 @@ namespace DLT_Project.Services
         public string ReadBarCode()
         {
             string barCode = null;
-            OperateResult<string> re = plc.ReadString(address.Barcode, 40);
+            OperateResult<string> re = plc.ReadString(address.Barcode, address.BarcodeLength);
             if (re.IsSuccess)
             {
-                barCode = re.Content.Trim();
+                barCode = re.Content;
+                barCode = barCode.Replace("\0","").Trim();
             }
             else
             {
@@ -85,7 +87,7 @@ namespace DLT_Project.Services
             OperateResult<short> re = plc.ReadInt16(address.Type);
             if (re.IsSuccess)
             {
-                type = (LRType) re.Content;
+                type = (LRType)re.Content;
             }
             else
             {
@@ -224,7 +226,7 @@ namespace DLT_Project.Services
         public float test()
         {
             float t = -1f;
-            //OperateResult re = plc.Write("D4000", 100.41f);
+            //OperateResult re = plc.Write("D88", 100.41f);
             //if (!re.IsSuccess)
             //{
             //    log.Error("ResData Write Error!");

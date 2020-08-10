@@ -11,55 +11,57 @@ namespace DLT_Project.Entity
         /// <summary>
         /// 条码
         /// </summary>
-        public string Barcode { get { return "D4500"; } }
+        public string Barcode { get; set; }
+
+        public ushort BarcodeLength { get; set; }
 
         /// <summary>
         /// Left & Right 
         /// </summary>
-        public string Type { get { return "D5007"; } }
+        public string Type { get; set; }
 
         /// <summary>
         /// 准备信号
         /// </summary>
-        public string Signal { get { return "D5008"; } }
+        public string Signal { get; set; }
 
         /// <summary>
         /// 1:加热；0:停止
         /// </summary>
-        public string HeaterSignal { get { return "D5000"; } }
+        public string HeaterSignal { get; set; }
         /// <summary>
         /// 回馈PLC信号
         /// </summary>
-        public string HeaterBack { get { return "D5001"; } }
+        public string HeaterBack { get; set; }
         /// <summary>
         /// 读取电阻信号 1:读取 0:不读取
         /// </summary>
-        public string ResSignal { get { return "D5002"; } }
+        public string ResSignal { get; set; }
         /// <summary>
         /// 电阻值回写PLC
         /// </summary>
-        public string ResDataBack { get { return "D5003"; } }
+        public string ResDataBack { get; set; }
         /// <summary>
         /// PLC传检测OK，通知PC存储检测记录
         /// </summary>
-        public string OverSignal { get { return "D5005"; } }
+        public string OverSignal { get; set; }
         /// <summary>
         /// PC反馈存储结果
         /// </summary>
-        public string OverBack { get { return "D5006"; } }
+        public string OverBack { get; set; }
 
-        public string LHeater { get { return "D4000"; } }
-        public string LSBROn { get { return "D4002"; } }
-        public string LSafety { get { return "D4004"; } }
-        public string LWalkIn { get { return "D4006"; } }
-        public string LBukle { get { return "D4008"; } }
-        public string LSBROff { get { return "D4009"; } }
+        public string LHeater { get; set; }
+        public string LSBROn { get; set; }
+        public string LSafety { get; set; }
+        public string LWalkIn { get; set; }
+        public string LBukle { get; set; }
+        public string LSBROff { get; set; }
 
-        public string RHeater { get { return "D4100"; } }
-        public string RSBROn { get { return "D4102"; } }
-        public string RSafety { get { return "D4104"; } }
-        public string RWalkIn { get { return "D4106"; } }
-        public string RBukle { get { return "D4108"; } }
-        public string RSBROff { get { return "D4109"; } }
+        public string RHeater { get; set; }
+        public string RSBROn { get; set; }
+        public string RSafety { get; set; }
+        public string RWalkIn { get; set; }
+        public string RBukle { get; set; }
+        public string RSBROff { get; set; }
     }
 }
