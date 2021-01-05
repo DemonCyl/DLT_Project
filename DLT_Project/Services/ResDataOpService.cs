@@ -33,7 +33,7 @@ namespace DLT_Project.Services
                 serialPort = new SerialPort(config.PortName, config.BaudRate, Parity.None, 8, StopBits.One);
                 serialPort.DtrEnable = true;
                 serialPort.RtsEnable = true;
-                serialPort.ReadTimeout = 100;
+                serialPort.ReadTimeout = 200;
                 mark = OpenPort();
             }
             return mark;
@@ -96,7 +96,7 @@ namespace DLT_Project.Services
 
         public float TransformData(string strData)
         {
-            float data = 0;
+            float data = 0f;
             // 00.000E-03  e.g. 00 000 -03
             string[] sArray1 = strData.Split('E');
             switch (sArray1[1].Trim())
@@ -112,6 +112,11 @@ namespace DLT_Project.Services
                     break;
                 case "+06":
                     data = float.Parse(sArray1[0]) * 1000000f;
+                    break;
+                case "+18":
+                case "+19":
+                case "+20":
+                    data = 2000000f;
                     break;
                 default:
                     data = -1.1f;

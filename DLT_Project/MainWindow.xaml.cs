@@ -285,7 +285,7 @@ namespace DLT_Project
 
 
             };
-            timer.Interval = TimeSpan.FromMilliseconds(100);
+            timer.Interval = TimeSpan.FromMilliseconds(50);
             timer.Start();
         }
 
