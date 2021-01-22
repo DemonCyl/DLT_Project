@@ -39,13 +39,15 @@ namespace DLT_Project
         private PlcDataOpService plcDataOpService;
         private PlcDataOpService qPlcDataOpService;
         private LINDataOpService linDataOpService;
-        private DispatcherTimer ShowTimer;
-        private DispatcherTimer timer;
+        private DispatcherTimer ShowTimer = null;
+        private DispatcherTimer timer = null;
+        private DispatcherTimer dispatcherTimer = null;
         private bool sPort = false;
         private bool mData = false;
         private bool mPlc = false;
         private bool qPlc = false;
         private bool babyLIN = false;
+        private bool remark = false;
         private static BitmapImage IFalse = new BitmapImage(new Uri("/Static/01.png", UriKind.Relative));
         private static BitmapImage ITrue = new BitmapImage(new Uri("/Static/02.png", UriKind.Relative));
         private static BitmapImage logo = new BitmapImage(new Uri("/Static/logo.png", UriKind.Relative));
@@ -107,7 +109,54 @@ namespace DLT_Project
                 }
             }
 
+            #region PLC连接定时器
+            timer = new System.Windows.Threading.DispatcherTimer();
+            timer.Tick += new EventHandler(ThreadCheck);
+            timer.Interval = new TimeSpan(0, 0, 0, 5);
+            timer.Start();
+            #endregion
 
+        }
+
+        public void ThreadCheck(object sender, EventArgs e)
+        {
+            //var check = qPlcDataOpService.ReadBarCode();
+            //var check1 = plcDataOpService.ReadSignal(SignalType.HeaterSignal);
+            //QPLCImage.Source = string.IsNullOrEmpty(check) ? IFalse : ITrue;
+            //FxPLCImage.Source = (check1 != -1) ? ITrue : IFalse;
+
+            //if (!string.IsNullOrEmpty(check) && check1 != -1)
+            //{
+            //    if (!remark)
+            //    {
+            //        //plcDataOpService.WriteSignal(1f);
+            //        //MessageText.Text = "启动正常！";
+            //        //CycleDataRead();
+            //    }
+            //} else
+            //{
+            //    MessageText.Text = "PLC连接异常！";
+            //    plcDataOpService.WriteSignal(2f);
+            //}
+
+            if (!remark)
+            {
+                ReConnect();
+            }
+
+            if (!babyLIN)
+            {
+                linDataOpService.DisConnect();
+                try
+                {
+                    babyLIN = linDataOpService.Initial();
+                }
+                catch (Exception ex)
+                {
+                    iLog.Error(ex.Message);
+                }
+                LinImage.Source = (babyLIN ? ITrue : IFalse);
+            }
         }
 
         /// <summary>
@@ -178,115 +227,124 @@ namespace DLT_Project
         private void CycleDataRead()
         {
 
-            timer = new DispatcherTimer();
-            timer.Tick += (s, e) =>
+            dispatcherTimer = new DispatcherTimer();
+            dispatcherTimer.Tick += (s, e) =>
             {
-                //读取BarCode
-                string barCode = qPlcDataOpService.ReadBarCode();
-                //初始化状态
-                if (barCode != null && !barCode.Equals("") && !barCode.Equals(markBarcode))
+                try
                 {
-
-                    markBarcode = barCode;
-                    dataMark = false;
-                }
-
-                codeText.Text = barCode.Trim();
-                //读取型号
-                LRType type = plcDataOpService.ReadType();
-                switch (type)
-                {
-                    case LRType.Left:
-                        TypeText.Text = "左驾";
-                        break;
-                    case LRType.Right:
-                        TypeText.Text = "右驾";
-                        break;
-                }
-
-
-                #region 读取Heater信号
-                short heater = plcDataOpService.ReadSignal(SignalType.HeaterSignal);
-                if (heater != -1)
-                {
-                    try
+                    //读取BarCode
+                    string barCode = qPlcDataOpService.ReadBarCode();
+                    //初始化状态
+                    if (barCode != null && !barCode.Equals("") && !barCode.Equals(markBarcode))
                     {
-                        switch (heater)
+
+                        markBarcode = barCode;
+                        dataMark = false;
+                    }
+
+                    codeText.Text = barCode.Trim();
+                    //读取型号
+                    LRType type = plcDataOpService.ReadType();
+                    switch (type)
+                    {
+                        case LRType.Left:
+                            TypeText.Text = "左驾";
+                            break;
+                        case LRType.Right:
+                            TypeText.Text = "右驾";
+                            break;
+                    }
+
+
+                    #region 读取Heater信号
+                    short heater = plcDataOpService.ReadSignal(SignalType.HeaterSignal);
+                    if (heater != -1)
+                    {
+                        try
                         {
-                            case 0:
-                                // 0 发送停止加热 00 00 00 00 00 00 00 00
-                                linDataOpService.SendCmd(type, CmdType.stop);
-                                plcDataOpService.WriteHeaterBack();
-                                break;
-                            case 1:
-                                //1 发送驱动加热 00 00 ?? ?? 00 00 00 00 // ??->E3  L  R
-                                linDataOpService.SendCmd(type, CmdType.start);
-                                break;
-                            default: break;
+                            switch (heater)
+                            {
+                                case 0:
+                                    // 0 发送停止加热 00 00 00 00 00 00 00 00
+                                    linDataOpService.SendCmd(type, CmdType.stop);
+                                    plcDataOpService.WriteHeaterBack();
+                                    break;
+                                case 1:
+                                    //1 发送驱动加热 00 00 ?? ?? 00 00 00 00 // ??->E3  L  R
+                                    linDataOpService.SendCmd(type, CmdType.start);
+                                    break;
+                                default: break;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            //MessageText.Text = ex.Message;
+                            iLog.Error(ex.Message);
+                        }
+
+                    }
+                    #endregion
+
+                    #region 读取Res信号
+                    short res = plcDataOpService.ReadSignal(SignalType.ResSignal);
+                    if (res == 1)
+                    {
+                        try
+                        {
+                            float fData = resDataOpService.ReadData();
+                            //write PLC data
+                            if (fData != -1.1f)
+                            {
+                                plcDataOpService.WriteRes(fData);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            //MessageText.Text = ex.Message;
+                            iLog.Error(ex.Message);
                         }
                     }
-                    catch (Exception ex)
+                    #endregion
+
+                    #region 读取存储信号
+                    over = plcDataOpService.ReadSignal(SignalType.OverSignal);
+                    if (over == 1 && !dataMark)
                     {
-                        //MessageText.Text = ex.Message;
-                        iLog.Error(ex.Message);
+                        if (barCode != null && barCode.Equals(""))
+                        {
+                            dataMark = true;
+                            // 读取测试数据资料
+                            mesInfo = plcDataOpService.GetInfo(barCode, type);
+                            // 存储MES数据
+                            bool t = mesDataOpService.DataInsert(mesInfo);
+                            if (!t) // 存储失败继续下一次存储直到成功
+                            {
+                                dataMark = false;
+                            }
+                            else
+                            {
+                                // 回写PLC存储状态 1:成功
+                                plcDataOpService.WriteOverBack();
+                                MessageText.Text = "该产品检测数据已存入数据库！";
+                                iLog.Info(string.Format("该产品{0}检测数据已存入数据库！", barCode.Trim()));
+                            }
+                        }
                     }
+                    #endregion
 
+                    remark = true;
                 }
-                #endregion
-
-                #region 读取Res信号
-                short res = plcDataOpService.ReadSignal(SignalType.ResSignal);
-                if (res == 1)
+                catch (Exception exc)
                 {
-                    try
-                    {
-                        float fData = resDataOpService.ReadData();
-                        //write PLC data
-                        if (fData != -1.1f)
-                        {
-                            plcDataOpService.WriteRes(fData);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        //MessageText.Text = ex.Message;
-                        iLog.Error(ex.Message);
-                    }
+                    iLog.Error("------PLC访问出错------");
+                    iLog.Error(exc.Message);
+                    dispatcherTimer.Stop();
+                    remark = false;
                 }
-                #endregion
-
-                #region 读取存储信号
-                over = plcDataOpService.ReadSignal(SignalType.OverSignal);
-                if (over == 1 && !dataMark)
-                {
-
-
-                    if (barCode != null && barCode.Equals(""))
-                    {
-                        dataMark = true;
-                        // 读取测试数据资料
-                        mesInfo = plcDataOpService.GetInfo(barCode, type);
-                        // 存储MES数据
-                        bool t = mesDataOpService.DataInsert(mesInfo);
-                        if (!t) // 存储失败继续下一次存储直到成功
-                        {
-                            dataMark = false;
-                        }
-                        else
-                        {
-                            // 回写PLC存储状态 1:成功
-                            plcDataOpService.WriteOverBack();
-                            MessageText.Text = "该产品检测数据已存入数据库！";
-                            iLog.Info(string.Format("该产品{0}检测数据已存入数据库！", barCode.Trim()));
-                        }
-                    }
-                }
-                #endregion
-
 
             };
-            timer.Interval = TimeSpan.FromMilliseconds(50);
-            timer.Start();
+            dispatcherTimer.Interval = TimeSpan.FromMilliseconds(50);
+            dispatcherTimer.Start();
         }
 
         private void ShowTimer1(object sender, EventArgs e)
@@ -322,12 +380,17 @@ namespace DLT_Project
         /// <param name="e"></param>
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            ReConnect();
+        }
+
+        private void ReConnect()
+        {
             iLog.Info("重新连接开始");
             plcDataOpService.WriteSignal(2f);
-            if (timer != null && timer.IsEnabled)
+            if (dispatcherTimer != null && dispatcherTimer.IsEnabled)
             {
-                timer.Stop();
-                timer = null;
+                dispatcherTimer.Stop();
+                dispatcherTimer = null;
             }
             mesDataOpService.Close();
             resDataOpService.Close();
@@ -340,6 +403,7 @@ namespace DLT_Project
             linDataOpService = null;
             qPlcDataOpService = null;
             config = null;
+            remark = false;
 
             Init();
             //连接ok

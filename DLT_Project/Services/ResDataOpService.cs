@@ -98,6 +98,7 @@ namespace DLT_Project.Services
         {
             float data = 0f;
             // 00.000E-03  e.g. 00 000 -03
+            log.Info("Read: "+strData);
             string[] sArray1 = strData.Split('E');
             switch (sArray1[1].Trim())
             {
@@ -116,6 +117,9 @@ namespace DLT_Project.Services
                 case "+18":
                 case "+19":
                 case "+20":
+                case "+28":
+                case "+29":
+                case "+30":
                     data = 2000000f;
                     break;
                 default:

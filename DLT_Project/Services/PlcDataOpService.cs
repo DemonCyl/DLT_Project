@@ -30,6 +30,7 @@ namespace DLT_Project.Services
             plc = new MelsecMcNet(configData.Fx5uPlcIpAdress, configData.Fx5uPlcPort);
             plc.ConnectTimeOut = 2000; //超时时间
 
+            plc.SetPersistentConnection();
             connect = plc.ConnectServer();
 
             if (!connect.IsSuccess)
@@ -47,6 +48,7 @@ namespace DLT_Project.Services
             plc.NetworkNumber = 0x00;  // 网络号
             plc.NetworkStationNumber = 0x00; // 网络站号
 
+            plc.SetPersistentConnection();
             connect = plc.ConnectServer();
 
             if (!connect.IsSuccess)
@@ -59,10 +61,7 @@ namespace DLT_Project.Services
 
         public void Close()
         {
-            if (connect.IsSuccess)
-            {
-                plc.ConnectClose();
-            }
+            plc.ConnectClose();
         }
 
         public string ReadBarCode()
@@ -72,7 +71,7 @@ namespace DLT_Project.Services
             if (re.IsSuccess)
             {
                 barCode = re.Content;
-                barCode = barCode.Replace("\0","").Trim();
+                barCode = barCode.Replace("\0", "").Trim();
             }
             else
             {
