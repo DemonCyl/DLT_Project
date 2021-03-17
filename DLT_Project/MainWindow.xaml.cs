@@ -108,6 +108,7 @@ namespace DLT_Project
                     iLog.Info("启动异常！");
                 }
             }
+            //CycleDataRead();
 
             #region PLC连接定时器
             timer = new System.Windows.Threading.DispatcherTimer();
@@ -286,7 +287,7 @@ namespace DLT_Project
                     #endregion
 
                     #region 读取Res信号
-                    short res = plcDataOpService.ReadSignal(SignalType.ResSignal);
+                    short res = qPlcDataOpService.ReadSignal(SignalType.ResSignal);
                     if (res == 1)
                     {
                         try
@@ -295,7 +296,7 @@ namespace DLT_Project
                             //write PLC data
                             if (fData != -1.1f)
                             {
-                                plcDataOpService.WriteRes(fData);
+                                qPlcDataOpService.WriteRes(fData);
                             }
                         }
                         catch (Exception ex)
@@ -343,7 +344,7 @@ namespace DLT_Project
                 }
 
             };
-            dispatcherTimer.Interval = TimeSpan.FromMilliseconds(50);
+            dispatcherTimer.Interval = TimeSpan.FromMilliseconds(40);
             dispatcherTimer.Start();
         }
 
