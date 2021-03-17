@@ -46,7 +46,7 @@ namespace DLT_Project.Services
             plc = new MelsecMcNet(configData.QPlcIpAdress, configData.QPlcPort);
             plc.ConnectTimeOut = 2000; //超时时间
             plc.NetworkNumber = 0x00;  // 网络号
-            plc.NetworkStationNumber = 0x00; // 网络站号
+            plc.NetworkStationNumber = 0x02; // 网络站号
 
             plc.SetPersistentConnection();
             connect = plc.ConnectServer();
