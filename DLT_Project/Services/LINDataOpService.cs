@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using de.lipowsky.LIN.Devices;
 using DLT_Project.Entity;
+using log4net;
 
 namespace DLT_Project.Services
 {
@@ -18,6 +19,7 @@ namespace DLT_Project.Services
         private string stopCmd = "inject 0x02 ";
         private string leftCmd = "inject 0x02 ";
         private string rightCmd = "inject 0x02 ";
+        private ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         public LINDataOpService(ConfigData configData)
         {
@@ -113,21 +115,39 @@ namespace DLT_Project.Services
                     if (type == LRType.Left)
                     {
                         ret = BabyLin.BL_sendCommand(this.handle, leftCmd);
+                        log.Info("左侧加热！");
                     }
                     else if (type == LRType.Right)
                     {
                         ret = BabyLin.BL_sendCommand(this.handle, rightCmd);
+                        log.Info("右侧加热！");
+                    }
+                    else if (type == LRType.Stop)
+                    {
+                        ret = BabyLin.BL_sendCommand(this.handle, stopCmd);
+                        log.Info("1-停止加热！");
                     }
                     break;
                 case CmdType.stop:
                     ret = BabyLin.BL_sendCommand(this.handle, stopCmd);
+                    log.Info("0-停止加热！");
                     break;
             }
             if (ret != BabyLin.BL_OK)
             {
-                throw new Exception("Send Error!");
+                log.Error("Send Error：" + ret);
             }
         }
 
+        public bool CheckStatus()
+        {
+            int ret = BabyLin.BL_sendCommand(this.handle, string.Format("mon_on {0} 1;", FrameIDForAllFrames));
+            if (ret != BabyLin.BL_OK)
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }

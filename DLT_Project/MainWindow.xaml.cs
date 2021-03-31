@@ -80,21 +80,21 @@ namespace DLT_Project
                 if (mData && qPlc)
                 {
                     plcDataOpService.WriteSignal(1f);
-                    MessageText.Text = "调试启动正常！";
+                    MessageText.Text = "启动正常！";
                     iLog.Info("调试启动正常！");
                     CycleDataRead();
                 }
                 else
                 {
                     plcDataOpService.WriteSignal(2f);
-                    MessageText.Text = "调试启动异常！";
+                    MessageText.Text = "启动异常！";
                     iLog.Info("调试启动异常！");
                 }
             }
             else  // 正式运行环境
             {
                 iLog.Info("--------------正式模式开启-------------");
-                if (mData && mPlc && qPlc && babyLIN && sPort)
+                if (mData && mPlc && qPlc && sPort)
                 {
                     plcDataOpService.WriteSignal(1f);
                     MessageText.Text = "启动正常！";
@@ -110,7 +110,7 @@ namespace DLT_Project
             }
             //CycleDataRead();
 
-            #region PLC连接定时器
+            #region 连接定时器
             timer = new System.Windows.Threading.DispatcherTimer();
             timer.Tick += new EventHandler(ThreadCheck);
             timer.Interval = new TimeSpan(0, 0, 0, 5);
@@ -121,29 +121,12 @@ namespace DLT_Project
 
         public void ThreadCheck(object sender, EventArgs e)
         {
-            //var check = qPlcDataOpService.ReadBarCode();
-            //var check1 = plcDataOpService.ReadSignal(SignalType.HeaterSignal);
-            //QPLCImage.Source = string.IsNullOrEmpty(check) ? IFalse : ITrue;
-            //FxPLCImage.Source = (check1 != -1) ? ITrue : IFalse;
-
-            //if (!string.IsNullOrEmpty(check) && check1 != -1)
-            //{
-            //    if (!remark)
-            //    {
-            //        //plcDataOpService.WriteSignal(1f);
-            //        //MessageText.Text = "启动正常！";
-            //        //CycleDataRead();
-            //    }
-            //} else
-            //{
-            //    MessageText.Text = "PLC连接异常！";
-            //    plcDataOpService.WriteSignal(2f);
-            //}
-
             if (!remark)
             {
                 ReConnect();
             }
+
+            babyLIN = babyLIN ? linDataOpService.CheckStatus() : babyLIN;
 
             if (!babyLIN)
             {
@@ -256,7 +239,6 @@ namespace DLT_Project
                             break;
                     }
 
-
                     #region 读取Heater信号
                     short heater = plcDataOpService.ReadSignal(SignalType.HeaterSignal);
                     if (heater != -1)
@@ -267,12 +249,47 @@ namespace DLT_Project
                             {
                                 case 0:
                                     // 0 发送停止加热 00 00 00 00 00 00 00 00
-                                    linDataOpService.SendCmd(type, CmdType.stop);
-                                    plcDataOpService.WriteHeaterBack();
+                                    if (babyLIN)
+                                    {
+                                        linDataOpService.SendCmd(type, CmdType.stop);
+                                        MessageText.Text = "发送停止加热报文！";
+                                        linDataOpService.DisConnect();
+                                        babyLIN = false;
+                                    }
                                     break;
                                 case 1:
                                     //1 发送驱动加热 00 00 ?? ?? 00 00 00 00 // ??->E3  L  R
-                                    linDataOpService.SendCmd(type, CmdType.start);
+                                    if (babyLIN)
+                                    {
+                                        linDataOpService.SendCmd(type, CmdType.start);
+                                    }
+                                    else
+                                    {
+                                        linDataOpService.DisConnect();
+                                        try
+                                        {
+                                            babyLIN = linDataOpService.Initial();
+                                            linDataOpService.SendCmd(type, CmdType.start);
+                                            if (type == LRType.Left)
+                                            {
+                                                MessageText.Text = "发送左侧加热报文！";
+                                            }
+                                            else if (type == LRType.Right)
+                                            {
+                                                MessageText.Text = "发送右侧加热报文！";
+                                            }
+                                            else if (type == LRType.Stop)
+                                            {
+                                                MessageText.Text = "发送-停止加热报文！";
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            iLog.Error(ex.Message);
+                                        }
+
+                                        LinImage.Source = (babyLIN ? ITrue : IFalse);
+                                    }
                                     break;
                                 default: break;
                             }
@@ -315,7 +332,17 @@ namespace DLT_Project
                         {
                             dataMark = true;
                             // 读取测试数据资料
-                            mesInfo = plcDataOpService.GetInfo(barCode, type);
+                            LRType lrType = LRType.Null;
+                            if (TypeText.Text.Equals("左驾"))
+                            {
+                                lrType = LRType.Left;
+                            }
+                            else if (TypeText.Text.Equals("右驾"))
+                            {
+                                lrType = LRType.Right;
+                            }
+
+                            mesInfo = plcDataOpService.GetInfo(barCode, lrType);
                             // 存储MES数据
                             bool t = mesDataOpService.DataInsert(mesInfo);
                             if (!t) // 存储失败继续下一次存储直到成功
@@ -372,6 +399,8 @@ namespace DLT_Project
             mesDataOpService.Close();
             resDataOpService.Close();
             plcDataOpService.Close();
+            qPlcDataOpService.Close();
+            linDataOpService.DisConnect();
         }
 
         /// <summary>
@@ -414,21 +443,21 @@ namespace DLT_Project
                 if (mData && qPlc)
                 {
                     plcDataOpService.WriteSignal(1f);
-                    MessageText.Text = "调试启动正常！";
+                    MessageText.Text = "启动正常！";
                     iLog.Info("调试启动正常！");
                     CycleDataRead();
                 }
                 else
                 {
                     plcDataOpService.WriteSignal(2f);
-                    MessageText.Text = "调试启动异常！";
+                    MessageText.Text = "启动异常！";
                     iLog.Info("调试启动异常！");
                 }
             }
             else  // 正式运行环境
             {
                 iLog.Info("--------------正式模式开启-------------");
-                if (mData && mPlc && qPlc && babyLIN && sPort)
+                if (mData && mPlc && qPlc && sPort)
                 {
                     plcDataOpService.WriteSignal(1f);
                     MessageText.Text = "启动正常！";

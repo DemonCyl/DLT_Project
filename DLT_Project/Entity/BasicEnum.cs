@@ -23,7 +23,8 @@ namespace DLT_Project.Entity
     {
         Null = 0,
         Left = 1,
-        Right = 2
+        Right = 2,
+        Stop = 3
     }
 
     /// <summary>
