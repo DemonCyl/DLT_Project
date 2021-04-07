@@ -48,6 +48,7 @@ namespace DLT_Project
         private bool qPlc = false;
         private bool babyLIN = false;
         private bool remark = false;
+        private bool linOpen = false;
         private static BitmapImage IFalse = new BitmapImage(new Uri("/Static/01.png", UriKind.Relative));
         private static BitmapImage ITrue = new BitmapImage(new Uri("/Static/02.png", UriKind.Relative));
         private static BitmapImage logo = new BitmapImage(new Uri("/Static/logo.png", UriKind.Relative));
@@ -126,8 +127,9 @@ namespace DLT_Project
                 ReConnect();
             }
 
-            babyLIN = babyLIN ? linDataOpService.CheckStatus() : babyLIN;
+            #region LIN Check
 
+            babyLIN = babyLIN ? linDataOpService.CheckStatus() : babyLIN;
             if (!babyLIN)
             {
                 linDataOpService.DisConnect();
@@ -140,7 +142,8 @@ namespace DLT_Project
                     iLog.Error(ex.Message);
                 }
                 LinImage.Source = (babyLIN ? ITrue : IFalse);
-            }
+            } 
+            #endregion
         }
 
         /// <summary>
@@ -249,12 +252,13 @@ namespace DLT_Project
                             {
                                 case 0:
                                     // 0 发送停止加热 00 00 00 00 00 00 00 00
-                                    if (babyLIN)
+                                    if (babyLIN && linOpen)
                                     {
                                         linDataOpService.SendCmd(type, CmdType.stop);
                                         MessageText.Text = "发送停止加热报文！";
                                         linDataOpService.DisConnect();
                                         babyLIN = false;
+                                        linOpen = false;
                                     }
                                     break;
                                 case 1:
@@ -290,6 +294,7 @@ namespace DLT_Project
 
                                         LinImage.Source = (babyLIN ? ITrue : IFalse);
                                     }
+                                    linOpen = true;
                                     break;
                                 default: break;
                             }
