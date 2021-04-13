@@ -142,7 +142,8 @@ namespace DLT_Project
                     iLog.Error(ex.Message);
                 }
                 LinImage.Source = (babyLIN ? ITrue : IFalse);
-            } 
+                linOpen = false;
+            }
             #endregion
         }
 
@@ -266,6 +267,7 @@ namespace DLT_Project
                                     if (babyLIN)
                                     {
                                         linDataOpService.SendCmd(type, CmdType.start);
+                                        linOpen = true;
                                     }
                                     else
                                     {
@@ -293,8 +295,9 @@ namespace DLT_Project
                                         }
 
                                         LinImage.Source = (babyLIN ? ITrue : IFalse);
+                                        linOpen = babyLIN;
                                     }
-                                    linOpen = true;
+
                                     break;
                                 default: break;
                             }
@@ -314,6 +317,7 @@ namespace DLT_Project
                     {
                         try
                         {
+                            resDataOpService.Check();
                             float fData = resDataOpService.ReadData();
                             //write PLC data
                             if (fData != -1.1f)
@@ -439,6 +443,7 @@ namespace DLT_Project
             qPlcDataOpService = null;
             config = null;
             remark = false;
+            linOpen = false;
 
             Init();
             //连接ok
@@ -565,24 +570,19 @@ namespace DLT_Project
         /// <param name="e"></param>
         private void Button_Click_ReadRes(object sender, RoutedEventArgs e)
         {
-            //float t = qPlcDataOpService.test();
-            //MessageText.Text = t.ToString();
-            //string test = qPlcDataOpService.ReadBarCode();
-            //MessageText.Text = test.Trim();
-            //iLog.Info(test.Trim() + "12");
-
             try
             {
-                if (sPort)
-                {
-                    float fData = resDataOpService.ReadData();
-                    MessageText.Text = "电阻值为：" + fData.ToString() + "Ω";
-                }
-                else
-                {
-                    MessageText.Text = "未连接电阻计！";
-                    iLog.Error("未连接电阻计！");
-                }
+                //if (sPort)
+                //{
+                resDataOpService.Check();
+                float fData = resDataOpService.ReadData();
+                MessageText.Text = "电阻值为：" + fData.ToString() + "Ω";
+                //}
+                //else
+                //{
+                //    MessageText.Text = "未连接电阻计！";
+                //    iLog.Error("未连接电阻计！");
+                //}
             }
             catch (Exception ex)
             {

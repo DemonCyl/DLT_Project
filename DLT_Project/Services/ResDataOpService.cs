@@ -36,6 +36,10 @@ namespace DLT_Project.Services
                 serialPort.ReadTimeout = 200;
                 mark = OpenPort();
             }
+            else
+            {
+                mark = OpenPort();
+            }
             return mark;
         }
 
@@ -88,17 +92,44 @@ namespace DLT_Project.Services
                 catch (Exception ex)
                 {
                     log.Error(ex.Message);
-                    throw new Exception(ex.Message);
+                    throw new Exception("1+" + ex.Message);
                 }
             }
             return data;
+        }
+
+        public void Check()
+        {
+            if (serialPort.IsOpen)
+            {
+                serialPort.DiscardInBuffer();
+                serialPort.DiscardOutBuffer();
+                try
+                {
+                    serialPort.WriteLine(cmd);
+                    serialPort.ReadLine();
+                }
+                catch (TimeoutException ex1)
+                {
+                    this.Close();
+                    this.GetConnection();
+                }
+                catch (Exception ex)
+                {
+                    log.Error("Check Error:" + ex.Message);
+                }
+            }
+            else
+            {
+                this.GetConnection();
+            }
         }
 
         public float TransformData(string strData)
         {
             float data = 0f;
             // 00.000E-03  e.g. 00 000 -03
-            log.Info("Read: "+strData);
+            log.Info("Read: " + strData);
             string[] sArray1 = strData.Split('E');
             switch (sArray1[1].Trim())
             {
